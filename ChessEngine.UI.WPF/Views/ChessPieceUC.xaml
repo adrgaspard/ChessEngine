@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="ChessEngine.UI.WPF.Views.ChessPieceUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChessEngine.UI.WPF.Views"
+             xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <converter:ObjectToVisibleCollapsedVisibilityConverter x:Key="objectToVisibilityConverter" />
+        <converter:ChessPieceTypeToPackIconFontAwesomeKindConverter x:Key="chessPieceTypeToFAKindConverter" />
+        <converter:ChessPieceColourToBrushConverter x:Key="chessPieceColourToBrushConverter" />
+    </UserControl.Resources>
+    <iconPacks:PackIconFontAwesome Visibility="{Binding Path=Piece, Converter={StaticResource ResourceKey=objectToVisibilityConverter}}"
+                                   Kind="{Binding Path=Piece.Type, Converter={StaticResource ResourceKey=chessPieceTypeToFAKindConverter}}" 
+                                   Foreground="{Binding Path=Piece.Colour, Converter={StaticResource ResourceKey=chessPieceColourToBrushConverter}}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" />
+</UserControl>
