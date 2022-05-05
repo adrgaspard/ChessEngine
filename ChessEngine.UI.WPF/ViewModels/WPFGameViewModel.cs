@@ -7,6 +7,7 @@ using ChessEngine.Core.Serialization.FEN.Tools;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels;
+using ChessEngine.UI.WPF.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,35 +17,7 @@ namespace ChessEngine.UI.WPF.ViewModels
     public class WPFGameViewModel : GameViewModel
     {
         public IReadOnlyList<IReadOnlyList<WPFPositionViewModel>> PositionVMList { get; protected init; }
-
-        protected Colour drageablePieces;
-        public Colour DrageablePieces
-        {
-            get => drageablePieces;
-            protected set
-            {
-                if (drageablePieces != value)
-                {
-                    drageablePieces = value;
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
-        protected Colour pointOfView;
-        public Colour PointOfView
-        {
-            get => pointOfView;
-            protected set
-            {
-                if (pointOfView != value)
-                {
-                    pointOfView = value;
-                    VerifyCanDrag();
-                    RaisePropertyChanged();
-                }
-            }
-        }
+        public LocalHumanPlayerViewModel PlayerVM => (Players[Game.CurrentPlayer] as LocalHumanPlayerViewModel) ?? (LocalHumanPlayerViewModel)Players[Colour.White | Colour.Black];
 
         protected Position selectedPosition;
         public Position SelectedPosition
@@ -103,9 +76,7 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
-        public ulong? Hash => Game?.Hash;
-
-        public WPFGameViewModel(IGameHashing<ulong> gameHashing) : base(new FENGameLoader(gameHashing).Load(FENConsts.StartFEN), gameHashing)
+        public WPFGameViewModel(IGameHashing<ulong> gameHashing) : base(new FENGameLoader(gameHashing).Load(FENConsts.StartFEN), gameHashing, new DispatcherService(App.Current.Dispatcher))
         {
             List<IReadOnlyList<WPFPositionViewModel>> positionsVMList = new(BoardConsts.BoardSize);
             for (sbyte i = 0; i < BoardConsts.BoardSize; i++)
@@ -118,11 +89,10 @@ namespace ChessEngine.UI.WPF.ViewModels
                 positionsVMList.Add(new ReadOnlyCollection<WPFPositionViewModel>(positionVMSubList));
             }
             PositionVMList = new ReadOnlyCollection<IReadOnlyList<WPFPositionViewModel>>(positionsVMList);
-            PointOfView = Colour.White;
             MovementExecuted += OnMovementExecuted;
         }
 
-        protected override void TreatChessMovementRequest(Movement request)
+        protected override void TreatDoRequest(Movement request)
         {
             IEnumerable<Movement> movementsOnPosition = PossibleMovements.Where(move => move.OldPosition == request.OldPosition && move.NewPosition == request.NewPosition);
             if (movementsOnPosition.Count() > 1 && movementsOnPosition.All(move => (move.Flag & MovementFlag.PawnAllPromotions) != MovementFlag.None) && (request.Flag & MovementFlag.PawnAllPromotions) == MovementFlag.None)
@@ -132,20 +102,18 @@ namespace ChessEngine.UI.WPF.ViewModels
             else
             {
                 NeedPromotionTypeSpecification = false;
-                base.TreatChessMovementRequest(request);
+                base.TreatDoRequest(request);
             }
         }
 
-        protected void OnMovementExecuted(object? sender, MovementExecutionEventArgs eventArgs)
+        protected override void NotifyPlayersForNewTurn()
         {
-            VerifyCanDrag();
-            MarkedPositions = new List<Position>(2) { eventArgs.Movement.OldPosition, eventArgs.Movement.NewPosition };
-            RaisePropertyChanged(nameof(Hash));
+            base.NotifyPlayersForNewTurn();
         }
 
-        protected void VerifyCanDrag()
+        protected virtual void OnMovementExecuted(object? sender, MovementExecutionEventArgs eventArgs)
         {
-            DrageablePieces = Game.CurrentPlayer & PointOfView;
+            MarkedPositions = new List<Position>(2) { eventArgs.Movement.OldPosition, eventArgs.Movement.NewPosition };
         }
     }
 }

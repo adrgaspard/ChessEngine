@@ -80,7 +80,7 @@ namespace ChessEngine.UI.WPF.ViewModels
             GameVM.PropertyChanged += OnGameVMPropertyChanged;
         }
 
-        private void OnGameVMPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
+        protected void OnGameVMPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
         {
             switch (eventArgs.PropertyName)
             {

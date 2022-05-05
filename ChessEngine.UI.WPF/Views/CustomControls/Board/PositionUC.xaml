@@ -8,7 +8,8 @@
              xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters.Board"
              mc:Ignorable="d" >
     <UserControl.Resources>
-        <commonconverter:BoolToVisibleCollapsedVisibilityConverter x:Key="boolToVisibilityConverter" />
+        <commonconverter:AndBoolsToVisibleCollapsedVisibilityConverter x:Key="boolsToVisibilityConverter" />
+        <converter:PositionToIsEmptyBoolConverter x:Key="positionToBoolConverter" />
         <converter:PositionToEvenBoolConverter x:Key="positionToEvenBoolConverter" />
         <converter:BoolsToBrushConverter x:Key="boolsToBrushConverter" />
         <converter:PositionToInvertedBrushConverter x:Key="positionToInvertedBrushConverter" />
@@ -31,8 +32,13 @@
                 <Binding Path="IsMarked" />
             </MultiBinding>
         </Grid.Background>
-        <Border BorderThickness="40" CornerRadius="40" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,-10" 
-                Visibility="{Binding Path=IsChecked, Converter={StaticResource ResourceKey=boolToVisibilityConverter}}">
+        <Border BorderThickness="50" CornerRadius="50" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Visibility>
+                <MultiBinding Converter="{StaticResource ResourceKey=boolsToVisibilityConverter}">
+                    <Binding Path="IsChecked" />
+                    <Binding Path="GameVM.SelectedPosition" Converter="{StaticResource ResourceKey=positionToBoolConverter}" />
+                </MultiBinding>
+            </Border.Visibility>
             <Border.BorderBrush>
                 <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
                     <RadialGradientBrush.GradientStops>

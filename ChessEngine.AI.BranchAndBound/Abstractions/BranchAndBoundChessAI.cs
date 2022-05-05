@@ -6,6 +6,6 @@ namespace ChessEngine.AI.BranchAndBound.Abstractions
 {
     public abstract class BranchAndBoundChessAI : IChessAI
     {
-        public abstract Movement SelectMovement(Game game, IList<Movement> legalMovements);
+        public abstract Task<Movement> SelectMovement(Game game, IReadOnlyList<Movement> legalMovements, CancellationToken cancellationToken);
     }
 }

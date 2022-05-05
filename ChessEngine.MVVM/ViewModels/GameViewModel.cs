@@ -10,6 +10,7 @@ using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels.Abstractions;
 using Microsoft.Toolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace ChessEngine.MVVM.ViewModels
@@ -18,7 +19,7 @@ namespace ChessEngine.MVVM.ViewModels
     {
         public Game Game { get; protected init; }
 
-        protected IList<Movement> PossibleMovements { get; set; }
+        public IReadOnlyList<Movement> PossibleMovements { get; protected set; }
 
         protected IMovementGenerator MovementGenerator { get; init; }
 
@@ -32,7 +33,7 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected Stack<Movement> MovementHistory { get; init; }
 
-        protected IChessAI AI { get; init; }
+        protected IReadOnlyDictionary<Colour, PlayerViewModel> Players { get; init; }
 
         protected bool canUndo;
         public bool CanUndo
@@ -76,27 +77,30 @@ namespace ChessEngine.MVVM.ViewModels
             }
         }
 
-        public ICommand TreatChessMovementRequestCommand { get; protected init; }
-
         public ICommand TreatUndoRequestCommand { get; protected init; }
 
         public event EventHandler<MovementExecutionEventArgs>? MovementExecuted;
 
-        public GameViewModel(Game game, IGameHashing<ulong> gameHashing)
+        public GameViewModel(Game game, IGameHashing<ulong> gameHashing, IDispatcherService dispatcherService)
         {
             Game = game;
             MovementHistory = new();
-            TreatChessMovementRequestCommand = new RelayCommand<Movement>(TreatChessMovementRequest);
             TreatUndoRequestCommand = new RelayCommand(TreatUndoRequest);
             GameHashing = gameHashing;
             MovementGenerator = new MovementGenerator();
             MovementMigrator = new MovementMigrator(GameHashing, true);
             AttackDataGenerator = new AttackDataGenerator();
             EndGameChecker = new EndGameChecker();
-            AI = new RandomChessAI();
             AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
             CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
+            Players = new Dictionary<Colour, PlayerViewModel>()
+            {
+                { Colour.White, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, false) },
+                { Colour.Black, new AIPlayerViewModel(this, dispatcherService, new RandomChessAI()) },
+                { Colour.White | Colour.Black, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, true) },
+            };
+            NotifyPlayersForNewTurn();
         }
 
         protected void Do(Movement movement)
@@ -110,7 +114,7 @@ namespace ChessEngine.MVVM.ViewModels
             CanUndo = true;
             MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Up));
             AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
             CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
             EndGameType = EndGameChecker.CheckEndGame(Game, attackData, PossibleMovements).Type;
         }
@@ -122,25 +126,23 @@ namespace ChessEngine.MVVM.ViewModels
             CanUndo = MovementHistory.Any();
             MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Down));
             AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
             CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
             EndGameType = EndGameType.GameIsNotFinished;
         }
 
-        protected virtual void TreatChessMovementRequest(Movement request)
+        protected virtual void TreatDoRequest(Movement request)
         {
             if (request.OldPosition == request.NewPosition) { return; }
             Piece piece = Game.Board[request.OldPosition];
             if (piece == PieceConsts.NoPiece) { return; }
             IEnumerable<Movement> movementsOnPosition = PossibleMovements.Where(move => move.OldPosition == request.OldPosition && move.NewPosition == request.NewPosition);
-            Movement? movement = movementsOnPosition.Any()
-                ? (movementsOnPosition.Count() == 1 ? movementsOnPosition.First() : movementsOnPosition.First(move => move.Flag == request.Flag))
-                : null;
+            Movement? movement = movementsOnPosition.Any() ? (movementsOnPosition.Count() == 1 ? movementsOnPosition.First() : movementsOnPosition.First(move => move.Flag == request.Flag)) : null;
             if (movement is null) { return; }
             Do(movement.Value);
-            if (PossibleMovements.Any())
+            if (EndGameType == EndGameType.GameIsNotFinished)
             {
-                Do(AI.SelectMovement(Game, PossibleMovements));
+                NotifyPlayersForNewTurn();
             }
         }
 
@@ -149,7 +151,29 @@ namespace ChessEngine.MVVM.ViewModels
             if (CanUndo)
             {
                 Undo();
+                if (Players[Game.CurrentPlayer] is AIPlayerViewModel)
+                {
+                    Undo();
+                }
+                if (EndGameType == EndGameType.GameIsNotFinished)
+                {
+                    NotifyPlayersForNewTurn();
+                }
             }
+        }
+
+        protected virtual void NotifyPlayersForNewTurn()
+        {
+            Players[Game.OpponentPlayer].OnTurnToPlayEnded();
+            Players[Game.OpponentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
+            Players[Game.CurrentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
+            Players[Game.CurrentPlayer].MovementFound += OnCurrentPlayerPlayMovement;
+            Players[Game.CurrentPlayer].OnTurnToPlayBegan();
+        }
+
+        protected void OnCurrentPlayerPlayMovement(object? sender, MovementFindingEventArgs eventArgs)
+        {
+            TreatDoRequest(eventArgs.Movement);
         }
     }
 }

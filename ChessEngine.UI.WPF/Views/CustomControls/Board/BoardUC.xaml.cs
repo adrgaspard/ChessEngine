@@ -50,7 +50,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 
         protected Point MouseDownPoint { get; set; }
 
-        protected PositionUC? ClickedPositionUC { get; set; }
+        protected PositionUC ClickedPositionUC { get; set; }
 
         protected PieceUC? SelectedPieceUC { get; set; }
 
@@ -100,7 +100,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 
         protected void OnGameVMPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
         {
-            if (eventArgs.PropertyName == nameof(WPFGameViewModel.NeedPromotionTypeSpecification) && GameVM.NeedPromotionTypeSpecification)
+            if (eventArgs.PropertyName == nameof(WPFGameViewModel.NeedPromotionTypeSpecification) && GameVM?.NeedPromotionTypeSpecification is true)
             {
                 PromotionViewModel promotionVM = new();
                 PromotionPopup promotionPopup = new(promotionVM);
@@ -115,7 +115,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                     PieceType.Queen => MovementFlag.PawnPromotionToQueen,
                     _ => throw new NotSupportedException($"The selected promotion type is not valid."),
                 };
-                GameVM.TreatChessMovementRequestCommand.Execute(new Movement(InitialRequest.OldPosition, InitialRequest.NewPosition, flag));
+                GameVM.PlayerVM.TreatMovementRequestCommand.Execute(new Movement(InitialRequest.OldPosition, InitialRequest.NewPosition, flag));
             }
 
         }
@@ -156,7 +156,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 IsMouseDown = true;
                 MouseDownPoint = eventArgs.GetPosition(Grid);
                 ClickedPositionUC = GetPositionUserControlAt(eventArgs.GetPosition(Grid));
-                if (ClickedPositionUC is null || (GameVM.Game.Board[ClickedPositionUC.PositionVM.Position].Colour & gameVM.DrageablePieces) == Colour.None) { return; }
+                if (ClickedPositionUC is null || (GameVM.Game.Board[ClickedPositionUC.PositionVM.Position].Colour & gameVM.PlayerVM.PlayableColour) == Colour.None) { return; }
                 gameVM.SelectedPosition = ClickedPositionUC.PositionVM.Position;
                 SelectedPieceUC = ClickedPositionUC.PieceUC;
                 IsDragAndDropInitialization = true;
@@ -179,7 +179,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                     SelectedPieceUC = null;
                     return;
                 }
-                PositionUC? clickedPositionUC = GetPositionUserControlAt(MouseDownPoint);
+                PositionUC clickedPositionUC = GetPositionUserControlAt(MouseDownPoint);
                 if (positionUC.PositionVM.Position == clickedPositionUC.PositionVM.Position)
                 {
                     if (IsDragAndDrop)
@@ -195,7 +195,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                     {
                         IsSelected = false;
                         InitialRequest = new(clickedPositionUC.PositionVM.Position, positionUC.PositionVM.Position, MovementFlag.None);
-                        GameVM.TreatChessMovementRequestCommand.Execute(InitialRequest);
+                        GameVM.PlayerVM.TreatMovementRequestCommand.Execute(InitialRequest);
                         clickedPositionUC.UpdatePieceUCFromViewModel();
                     }
                     else
@@ -208,7 +208,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                     Canvas.Children.Remove(SelectedPieceUC);
                     IsSelected = false;
                     InitialRequest = new(clickedPositionUC.PositionVM.Position, positionUC.PositionVM.Position, MovementFlag.None);
-                    GameVM.TreatChessMovementRequestCommand.Execute(InitialRequest);
+                    GameVM.PlayerVM.TreatMovementRequestCommand.Execute(InitialRequest);
                     clickedPositionUC.UpdatePieceUCFromViewModel();
                     IsDragAndDrop = false;
                 }
@@ -248,7 +248,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
             Canvas.SetTop(SelectedPieceUC, eventArgs.GetPosition(this).Y - SelectedPieceUC.ActualHeight / 2);
         }
 
-        protected PositionUC? GetPositionUserControlAt(Point point)
+        protected PositionUC GetPositionUserControlAt(Point point)
         {
             int rank = 0;
             int file = 0;
@@ -272,7 +272,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 }
                 file++;
             }
-            return Grid.Children.OfType<UIElement>().First(element => Grid.GetColumn(element) == file && Grid.GetRow(element) == rank) as PositionUC;
+            return (PositionUC)Grid.Children.OfType<UIElement>().First(element => Grid.GetColumn(element) == file && Grid.GetRow(element) == rank);
         }
     }
 }

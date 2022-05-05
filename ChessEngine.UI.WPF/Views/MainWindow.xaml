@@ -24,7 +24,7 @@
         <hashconverter:UlongToBitStringConverter x:Key="ulongToBitStringConverter" />
     </Window.Resources>
     <DockPanel DataContext="{Binding Path=GameVM, Source={StaticResource ResourceKey=Locator}}">
-        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >
+        <!--<TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >
                     <Run Text="Game end status :" Foreground="White"/>
                     <Run Text="{Binding Path=EndGameType, Mode=OneWay}" Foreground="DeepSkyBlue" />
         </TextBlock>
@@ -34,10 +34,10 @@
                     <Run Text="[" />
                     <Run Text="{Binding Path=Hash, Mode=OneWay}" />
                     <Run Text="]" />
-        </TextBlock>
+        </TextBlock>-->
         <Button DockPanel.Dock="Top" Content="Undo" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=TreatUndoRequestCommand}" IsEnabled="{Binding Path=CanUndo}" Padding="10,5,10,5" />
         <Grid>
-            <boardControls:BoardUC Width="600" Height="600" PointOfView="{Binding Path=PointOfView}" />
+            <boardControls:BoardUC Width="600" Height="600" PointOfView="{Binding Path=PlayerVM.PointOfView}" />
         </Grid>
     </DockPanel>
 </controls:MetroWindow>

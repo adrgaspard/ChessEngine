@@ -5,6 +5,6 @@ namespace ChessEngine.Core.AI
 {
     public interface IChessAI
     {
-        Movement SelectMovement(Game game, IList<Movement> legalMovements);
+        Movement SelectMovement(Game game, IReadOnlyList<Movement> legalMovements, CancellationToken token);
     }
 }

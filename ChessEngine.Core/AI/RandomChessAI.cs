@@ -6,7 +6,7 @@ namespace ChessEngine.Core.AI
 {
     public class RandomChessAI : IChessAI
     {
-        public Movement SelectMovement(Game game, IList<Movement> legalMovements)
+        public Movement SelectMovement(Game game, IReadOnlyList<Movement> legalMovements, CancellationToken cancellationToken)
         {
             return legalMovements[Randomizer.Instance.Next(legalMovements.Count)];
         }
