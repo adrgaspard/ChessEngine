@@ -1,14 +1,10 @@
 ﻿using ChessEngine.Core.Environment;
-using ChessEngine.Core.Environment.Tools;
 using ChessEngine.MVVM.Models;
+using ChessEngine.MVVM.ViewModels;
 using ChessEngine.MVVM.ViewModels.Abstractions;
-using ChessEngine.UI.WPF.Models;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessEngine.UI.WPF.ViewModels
 {
@@ -62,6 +58,20 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
+        protected bool isChecked;
+        public bool IsChecked
+        {
+            get => isChecked;
+            protected set
+            {
+                if (isChecked != value)
+                {
+                    isChecked = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public WPFPositionViewModel(WPFGameViewModel gameVM, Position position)
         {
             GameVM = gameVM;
@@ -82,6 +92,9 @@ namespace ChessEngine.UI.WPF.ViewModels
                     break;
                 case nameof(WPFGameViewModel.MarkedPositions):
                     IsMarked = GameVM.MarkedPositions.Contains(Position);
+                    break;
+                case nameof(GameViewModel.CheckedPosition):
+                    IsChecked = GameVM.CheckedPosition == Position;
                     break;
                 default:
                     break;

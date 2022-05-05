@@ -1,18 +1,16 @@
 ﻿using ChessEngine.Core.Environment;
 using ChessEngine.Core.Environment.Tools;
+using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Match;
 using ChessEngine.Core.Serialization.FEN;
 using ChessEngine.Core.Serialization.FEN.Tools;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels;
-using ChessEngine.MVVM.ViewModels.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessEngine.UI.WPF.ViewModels
 {
@@ -92,6 +90,22 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
+        protected bool needPromotionTypeSpecification;
+        public bool NeedPromotionTypeSpecification
+        {
+            get => needPromotionTypeSpecification;
+            protected set
+            {
+                if (needPromotionTypeSpecification != value)
+                {
+                    needPromotionTypeSpecification = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public ulong? Hash => Game?.Hash;
+
         public WPFGameViewModel(IGameHashing<ulong> gameHashing) : base(new FENGameLoader(gameHashing).Load(FENConsts.StartFEN), gameHashing)
         {
             List<IReadOnlyList<WPFPositionViewModel>> positionsVMList = new(BoardConsts.BoardSize);
@@ -109,10 +123,25 @@ namespace ChessEngine.UI.WPF.ViewModels
             MovementExecuted += OnMovementExecuted;
         }
 
+        protected override void TreatChessMovementRequest(Movement request)
+        {
+            IEnumerable<Movement> movementsOnPosition = PossibleMovements.Where(move => move.OldPosition == request.OldPosition && move.NewPosition == request.NewPosition);
+            if (movementsOnPosition.Count() > 1 && movementsOnPosition.All(move => (move.Flag & MovementFlag.PawnAllPromotions) != MovementFlag.None) && (request.Flag & MovementFlag.PawnAllPromotions) == MovementFlag.None)
+            {
+                NeedPromotionTypeSpecification = true;
+            }
+            else
+            {
+                NeedPromotionTypeSpecification = false;
+                base.TreatChessMovementRequest(request);
+            }
+        }
+
         protected void OnMovementExecuted(object? sender, MovementExecutionEventArgs eventArgs)
         {
             VerifyCanDrag();
             MarkedPositions = new List<Position>(2) { eventArgs.Movement.OldPosition, eventArgs.Movement.NewPosition };
+            RaisePropertyChanged(nameof(Hash));
         }
 
         protected void VerifyCanDrag()

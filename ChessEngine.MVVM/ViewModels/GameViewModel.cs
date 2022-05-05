@@ -62,6 +62,20 @@ namespace ChessEngine.MVVM.ViewModels
             }
         }
 
+        protected Position checkedPosition;
+        public Position CheckedPosition
+        {
+            get => checkedPosition;
+            protected set
+            {
+                if (checkedPosition != value)
+                {
+                    checkedPosition = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public ICommand TreatChessMovementRequestCommand { get; protected init; }
 
         public ICommand TreatUndoRequestCommand { get; protected init; }
@@ -80,12 +94,9 @@ namespace ChessEngine.MVVM.ViewModels
             AttackDataGenerator = new AttackDataGenerator();
             EndGameChecker = new EndGameChecker();
             AI = new RandomChessAI();
-            PossibleMovements = MovementGenerator.GenerateMovements(Game, AttackDataGenerator.GenerateAttackData(Game));
-        }
-
-        protected virtual Movement? SelectMovement(Piece piece, IEnumerable<Movement> movements)
-        {
-            return movements.Any() ? movements.First() : null;
+            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
+            PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
         }
 
         protected void Do(Movement movement)
@@ -100,6 +111,7 @@ namespace ChessEngine.MVVM.ViewModels
             MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Up));
             AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
             PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
             EndGameType = EndGameChecker.CheckEndGame(Game, attackData, PossibleMovements).Type;
         }
 
@@ -109,16 +121,21 @@ namespace ChessEngine.MVVM.ViewModels
             MovementMigrator.Down(Game, movement);
             CanUndo = MovementHistory.Any();
             MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Down));
-            PossibleMovements = MovementGenerator.GenerateMovements(Game, AttackDataGenerator.GenerateAttackData(Game));
+            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
+            PossibleMovements = MovementGenerator.GenerateMovements(Game, attackData);
+            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
             EndGameType = EndGameType.GameIsNotFinished;
         }
 
-        protected void TreatChessMovementRequest(Movement request)
+        protected virtual void TreatChessMovementRequest(Movement request)
         {
             if (request.OldPosition == request.NewPosition) { return; }
             Piece piece = Game.Board[request.OldPosition];
             if (piece == PieceConsts.NoPiece) { return; }
-            Movement? movement = SelectMovement(piece, PossibleMovements.Where(move => move.OldPosition == request.OldPosition && move.NewPosition == request.NewPosition));
+            IEnumerable<Movement> movementsOnPosition = PossibleMovements.Where(move => move.OldPosition == request.OldPosition && move.NewPosition == request.NewPosition);
+            Movement? movement = movementsOnPosition.Any()
+                ? (movementsOnPosition.Count() == 1 ? movementsOnPosition.First() : movementsOnPosition.First(move => move.Flag == request.Flag))
+                : null;
             if (movement is null) { return; }
             Do(movement.Value);
             if (PossibleMovements.Any())

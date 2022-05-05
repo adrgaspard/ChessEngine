@@ -9,7 +9,7 @@
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                       xmlns:boardControls="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Board"
                       mc:Ignorable="d"
-                      Title="{Binding Path=AppName}" Height="750" Width="1400"
+                      Title="{Binding Path=AppName}" Height="750" Width="820"
                       DataContext="{Binding Path=MainVM, Source={StaticResource ResourceKey=Locator}}"
                       GlowBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
                       WindowTitleBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
@@ -21,47 +21,24 @@
         </DataTemplate>
     </controls:MetroWindow.IconTemplate>
     <Window.Resources>
-        <converter:ChessPieceTypeToPackIconFontAwesomeKindConverter x:Key="chessPieceTypeToFAKindConverter" />
+        <converter:PieceTypeToPackIconFontAwesomeKindConverter x:Key="chessPieceTypeToFAKindConverter" />
         <converter:UlongToBitStringConverter x:Key="ulongToBitStringConverter" />
     </Window.Resources>
-    <ContentPresenter>
-        <ContentPresenter.Content>
-            <DockPanel DataContext="{Binding Path=GameVM, Source={StaticResource ResourceKey=Locator}}">
-                <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >
+    <DockPanel DataContext="{Binding Path=GameVM, Source={StaticResource ResourceKey=Locator}}">
+        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >
                     <Run Text="Game end status :" Foreground="White"/>
                     <Run Text="{Binding Path=EndGameType, Mode=OneWay}" Foreground="DeepSkyBlue" />
-                </TextBlock>
-                <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,5,10,10" >
+        </TextBlock>
+        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,5,10,10" >
                     <Run Text="Hash Value :" Foreground="White"/>
                     <Run Text="{Binding Path=Hash, Converter={StaticResource ResourceKey=ulongToBitStringConverter}, Mode=OneWay}"  Foreground="Red" />
                     <Run Text="[" />
                     <Run Text="{Binding Path=Hash, Mode=OneWay}" />
-                    <Run Text="]" />        
-                </TextBlock>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="112" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <ListBox ItemsSource="{Binding Path=AvailablePromotionTypes}" SelectedItem="{Binding Path=SelectedpromotionType, Mode=TwoWay}"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" BorderThickness="0">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Background="LightGray" Width="80" Height="80" Margin="10">
-                                        <iconPacks:PackIconFontAwesome Kind="{Binding Converter={StaticResource ResourceKey=chessPieceTypeToFAKindConverter}}" 
-                                   Foreground="DarkBlue" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        <Button Content="Undo" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=TreatUndoRequestCommand}" IsEnabled="{Binding Path=CanUndo}" Padding="5" />
-                    </StackPanel>
-                    <local:ChessBoardUC Grid.Column="1" Width="600" Height="600" />
-                    <boardControls:BoardUC Grid.Column="2" Width="600" Height="600" DataContext="{Binding Path=GameVM2, Source={StaticResource ResourceKey=Locator}}" PointOfView="{Binding Path=PointOfView}" />
-                </Grid>
-            </DockPanel>
-        </ContentPresenter.Content>
-    </ContentPresenter>
+                    <Run Text="]" />
+        </TextBlock>
+        <Button DockPanel.Dock="Top" Content="Undo" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=TreatUndoRequestCommand}" IsEnabled="{Binding Path=CanUndo}" Padding="10,5,10,5" />
+        <Grid>
+            <boardControls:BoardUC Width="600" Height="600" PointOfView="{Binding Path=PointOfView}" />
+        </Grid>
+    </DockPanel>
 </controls:MetroWindow>

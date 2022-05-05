@@ -1,4 +1,5 @@
 ﻿using ChessEngine.Core.Transposition.Zobrist;
+using ChessEngine.MVVM.ViewModels;
 
 namespace ChessEngine.UI.WPF.ViewModels
 {
@@ -6,15 +7,15 @@ namespace ChessEngine.UI.WPF.ViewModels
     {
         public MainViewModel MainVM { get; init; }
 
-        public WPFChessGameViewModel GameVM { get; init; }
+        public WPFGameViewModel GameVM { get; init; }
 
-        public WPFGameViewModel GameVM2 { get; init; }
+        public PromotionViewModel PromotionVM { get; init; }
 
         public ViewModelLocator()
         {
             MainVM = new();
             GameVM = new(new ZobristHashing());
-            GameVM2 = new(new ZobristHashing());
+            PromotionVM = new();
         }
     }
 }

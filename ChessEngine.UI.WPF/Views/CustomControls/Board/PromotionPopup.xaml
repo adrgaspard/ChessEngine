@@ -1,0 +1,46 @@
+﻿<controls:MetroWindow x:Class="ChessEngine.UI.WPF.Views.CustomControls.Board.PromotionPopup"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      xmlns:local="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Board"
+                      xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters"
+                      xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                      xmlns:boardControls="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Board"
+                      mc:Ignorable="d"
+                      Title="Choose promotion type" IsCloseButtonEnabled="False" ShowCloseButton="False" ResizeMode="NoResize"
+                      Width="484" Height="250" WindowStartupLocation="CenterOwner"
+                      DataContext="{Binding Path=MainVM, Source={StaticResource ResourceKey=Locator}}"
+                      GlowBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
+                      WindowTitleBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
+                      Style="{StaticResource ResourceKey=customWindowStyle}">
+    <Window.Resources>
+        <converter:PieceTypeToPackIconFontAwesomeKindConverter x:Key="pieceTypeToFAKindConverter" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ListBox Grid.Row="0" DataContext="{Binding Path=PromotionVM, Source={StaticResource ResourceKey=Locator}}"
+                 ItemsSource="{Binding Path=AvailablePromotionTypes}" SelectedItem="{Binding Path=SelectedPromotionType, Mode=TwoWay}"
+                 Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,20,20,10">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Background="LightGray" Width="80" Height="80" Margin="10">
+                        <iconPacks:PackIconFontAwesome Kind="{Binding Converter={StaticResource ResourceKey=pieceTypeToFAKindConverter}}" 
+                                                       Foreground="#222222" HorizontalAlignment="Center" VerticalAlignment="Center" Width="60" Height="60" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Grid.Row="1" Style="{StaticResource ResourceKey=customButtonStyle}" Content="Validate choice" Click="OnChoiceValidated" 
+                FontSize="18" Padding="20,10,20,10" Margin="20,10,20,20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</controls:MetroWindow>

@@ -7,21 +7,49 @@
              mc:Ignorable="d" 
              xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters">
     <UserControl.Resources>
-        <converter:ChessPositionToColorConverter x:Key="chessPositionToColorConverter" />
+        <converter:PositionToColorConverter x:Key="positionToColorConverter" />
+        <converter:PositionToInvertedColorBrushConverter x:Key="positionToInvertedBrushConverter" />
         <converter:HighlightedBoolToColorConverter x:Key="highlightedBoolToColorConverter" />
         <converter:SelectedBoolToColorConverter x:Key="selectedBoolToColorConverter" />
         <converter:MarkedBoolToColorConverter x:Key="markedBoolToColorConverter" />
         <converter:ColorsToBrushConverter x:Key="colorsToBrushConverter" />
+        <converter:PositionByRankToVisibilityConverter x:Key="positionByRankToVisibilityConverter" />
+        <converter:PositionByFileToVisibilityConverter x:Key="positionByFileToVisibilityConverter" />
+        <converter:PositionByRankToStringConverter x:Key="positionByRankToStringConverter" />
+        <converter:PositionByFileToStringConverter x:Key="positionByFileToStringConverter" />
+        <converter:BoolToVisibleCollapsedVisibilityConverter x:Key="boolToVisibilityConverter" />
+        <Style x:Key="boardIndicatorsTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="ExtraBold" />
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.Background>
             <MultiBinding Converter="{StaticResource ResourceKey=colorsToBrushConverter}">
-                <Binding Path="Position" Converter="{StaticResource ResourceKey=chessPositionToColorConverter}" />
+                <Binding Path="Position" Converter="{StaticResource ResourceKey=positionToColorConverter}" />
                 <Binding Path="IsHighlighted" Converter="{StaticResource ResourceKey=highlightedBoolToColorConverter}" />
                 <Binding Path="IsSelected" Converter="{StaticResource ResourceKey=selectedBoolToColorConverter}" />
                 <Binding Path="IsMarked" Converter="{StaticResource ResourceKey=markedBoolToColorConverter}" />
             </MultiBinding>
         </Grid.Background>
+        <Border BorderThickness="40" CornerRadius="40" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,-10" Visibility="{Binding Path=IsChecked, Converter={StaticResource ResourceKey=boolToVisibilityConverter}}">
+            <Border.BorderBrush>
+                <RadialGradientBrush GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                    <RadialGradientBrush.GradientStops>
+                        <GradientStop Color="#FFFF0000" Offset="0.35" />
+                        <GradientStop Color="#40FF0000" Offset="0.7" />
+                        <GradientStop Color="#10FF0000" Offset="0.8" />
+                        <GradientStop Color="#04FF0000" Offset="0.9" />
+                        <GradientStop Color="Transparent" Offset="1" />
+                    </RadialGradientBrush.GradientStops>
+                </RadialGradientBrush>
+            </Border.BorderBrush>
+        </Border>
         <UserControl />
+        <TextBlock Text="{Binding Path=Position, Converter={StaticResource ResourceKey=positionByFileToStringConverter}}" Visibility="{Binding Path=Position, Converter={StaticResource ResourceKey=positionByRankToVisibilityConverter}}"
+                   Style="{StaticResource ResourceKey=boardIndicatorsTextBlockStyle}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="2,-1,0,0" Foreground="{Binding Path=Position, Converter={StaticResource ResourceKey=positionToInvertedBrushConverter}}" />
+        <TextBlock Text="{Binding Path=Position, Converter={StaticResource ResourceKey=positionByRankToStringConverter}}" Visibility="{Binding Path=Position, Converter={StaticResource ResourceKey=positionByFileToVisibilityConverter}}"
+                   Style="{StaticResource ResourceKey=boardIndicatorsTextBlockStyle}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,-2,2,0" Foreground="{Binding Path=Position, Converter={StaticResource ResourceKey=positionToInvertedBrushConverter}}" />
     </Grid>
 </UserControl>

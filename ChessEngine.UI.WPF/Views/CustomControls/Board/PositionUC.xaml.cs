@@ -1,20 +1,10 @@
 ﻿using ChessEngine.Core.Environment.Tools;
 using ChessEngine.UI.WPF.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 {
@@ -42,7 +32,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
             PositionVM = positionVM;
             DataContextChanged += OnDataContextChanged;
             RootElement = LogicalTreeHelper.GetChildren(this).Cast<Panel>().First();
-            Control = LogicalTreeHelper.GetChildren(RootElement).Cast<UserControl>().First();
+            Control = LogicalTreeHelper.GetChildren(RootElement).Cast<FrameworkElement>().Where(element => element.GetType() == typeof(UserControl)).Cast<UserControl>().First();
             UpdatePieceUC();
             PositionVM.PropertyChanged += OnPositionVMPropertyChanged;
         }
