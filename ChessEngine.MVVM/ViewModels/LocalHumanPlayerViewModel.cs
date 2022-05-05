@@ -52,7 +52,7 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected void VerifyCanDrag()
         {
-            PlayableColour = IsReadOnly ? Colour.None : GameVM.Game.CurrentPlayer & PointOfView;
+            PlayableColour = IsReadOnly || GameVM.EndGameType != Core.Match.EndGameType.GameIsNotFinished ? Colour.None : GameVM.Game.CurrentPlayer & PointOfView;
         }
     }
 }

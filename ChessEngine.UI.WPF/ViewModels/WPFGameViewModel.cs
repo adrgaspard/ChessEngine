@@ -106,12 +106,7 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
-        protected override void NotifyPlayersForNewTurn()
-        {
-            base.NotifyPlayersForNewTurn();
-        }
-
-        protected virtual void OnMovementExecuted(object? sender, MovementExecutionEventArgs eventArgs)
+        protected void OnMovementExecuted(object? sender, MovementExecutionEventArgs eventArgs)
         {
             MarkedPositions = new List<Position>(2) { eventArgs.Movement.OldPosition, eventArgs.Movement.NewPosition };
         }

@@ -1,57 +1,60 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace ChessEngine.Core.Utils
 {
-    public class Clock : INotifyPropertyChanged
+    public class Clock : IDisposable, INotifyPropertyChanged
     {
+        protected readonly Stopwatch Stopwatch;
         protected readonly Timer Timer;
 
-        protected TimeSpan remainingTime;
-        public TimeSpan RemainingTime
+        protected TimeSpan maxTime;
+        protected TimeSpan MaxTime
         {
-            get => remainingTime;
-            protected set
+            get => maxTime;
+            set
             {
-                if (remainingTime != value)
-                {
-                    if (value <= TimeSpan.Zero)
-                    {
-                        remainingTime = TimeSpan.Zero;
-                    }
-                    else
-                    {
-                        remainingTime = value;
-                    }
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RemainingTime)));
-                }
+                maxTime = value;
+                PropertyChanged?.Invoke(this, new(nameof(RemainingTime)));
             }
         }
+
+        public TimeSpan RemainingTime
+        {
+            get
+            {
+                double remainingTime = MaxTime.TotalMilliseconds - Stopwatch.ElapsedMilliseconds;
+                return remainingTime > 0 ? TimeSpan.FromMilliseconds(remainingTime) : TimeSpan.Zero;
+            }
+        }
+
+        public bool IsActivated => Timer.Enabled;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public event CountdownFinishedEventHandler? CountdownFinished;
 
-        public int RefreshRateInMs { get; protected init; }
-
-        public Clock(int refreshRateInMs)
+        public Clock(int refreshDelayInMs)
         {
-            RefreshRateInMs = refreshRateInMs;
-            Timer = new(refreshRateInMs);
-            Timer.AutoReset = true;
-            Timer.Enabled = false;
+            Stopwatch = new();
+            Timer = new(refreshDelayInMs);
             Timer.Elapsed += OnTimerElapsed;
         }
 
         public void Start()
         {
             Timer.Start();
+            Stopwatch.Start();
+            PropertyChanged?.Invoke(this, new(nameof(IsActivated)));
         }
 
-        public void Stop()
+        public void Pause()
         {
             Timer.Stop();
+            Stopwatch.Stop();
+            PropertyChanged?.Invoke(this, new(nameof(IsActivated)));
         }
 
         public void Set(TimeSpan timeSpan)
@@ -60,7 +63,12 @@ namespace ChessEngine.Core.Utils
             {
                 throw new InvalidOperationException("The clock must be stopped to perform a change on it.");
             }
-            RemainingTime = timeSpan;
+            if (timeSpan <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("The timespan must represent a positive value.");
+            }
+            Stopwatch.Reset();
+            MaxTime = timeSpan;
         }
 
         public void Add(TimeSpan timeSpan)
@@ -73,12 +81,21 @@ namespace ChessEngine.Core.Utils
             Set(RemainingTime - timeSpan);
         }
 
+        public void Dispose()
+        {
+            Pause();
+            Timer.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
         protected void OnTimerElapsed(object? sender, ElapsedEventArgs eventArgs)
         {
-            RemainingTime -= DateTime.Now - eventArgs.SignalTime;
-            if (RemainingTime <= TimeSpan.Zero)
+            PropertyChanged?.Invoke(this, new(nameof(RemainingTime)));
+            if (MaxTime.TotalMilliseconds <= Stopwatch.ElapsedMilliseconds)
             {
-                Stop();
+                Timer.Enabled = false;
+                Stopwatch.Stop();
+                CountdownFinished?.Invoke(this, new());
             }
         }
     }

@@ -7,7 +7,9 @@ using ChessEngine.Core.Interactions.Generation;
 using ChessEngine.Core.Interactions.Migration;
 using ChessEngine.Core.Match;
 using ChessEngine.Core.Transposition.Contracts;
+using ChessEngine.Core.Utils;
 using ChessEngine.MVVM.Models;
+using ChessEngine.MVVM.Utils;
 using ChessEngine.MVVM.ViewModels.Abstractions;
 using Microsoft.Toolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -35,15 +37,17 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected IReadOnlyDictionary<Colour, PlayerViewModel> Players { get; init; }
 
-        protected bool canUndo;
-        public bool CanUndo
+        public IReadOnlyDictionary<Colour, ClockViewModel> Clocks { get; protected init; }
+
+        protected bool isStarted;
+        public bool IsStarted
         {
-            get => canUndo;
+            get => isStarted;
             protected set
             {
-                if (canUndo != value)
+                if (isStarted != value)
                 {
-                    canUndo = value;
+                    isStarted = value;
                     RaisePropertyChanged();
                 }
             }
@@ -58,6 +62,14 @@ namespace ChessEngine.MVVM.ViewModels
                 if (endGameType != value)
                 {
                     endGameType = value;
+                    if (EndGameType != EndGameType.GameIsNotFinished)
+                    {
+                        PossibleMovements = new List<Movement>(0);
+                        foreach (PlayerViewModel playerVM in Players.Values)
+                        {
+                            playerVM.OnTurnToPlayEnded();
+                        }
+                    }
                     RaisePropertyChanged();
                 }
             }
@@ -77,30 +89,48 @@ namespace ChessEngine.MVVM.ViewModels
             }
         }
 
-        public ICommand TreatUndoRequestCommand { get; protected init; }
+        public ICommand StartCommand { get; protected init; }
 
         public event EventHandler<MovementExecutionEventArgs>? MovementExecuted;
 
         public GameViewModel(Game game, IGameHashing<ulong> gameHashing, IDispatcherService dispatcherService)
         {
+            IsStarted = false;
             Game = game;
             MovementHistory = new();
-            TreatUndoRequestCommand = new RelayCommand(TreatUndoRequest);
+            StartCommand = new RelayCommand(Start);
             GameHashing = gameHashing;
             MovementGenerator = new MovementGenerator();
             MovementMigrator = new MovementMigrator(GameHashing, true);
             AttackDataGenerator = new AttackDataGenerator();
             EndGameChecker = new EndGameChecker();
-            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
-            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
-            Players = new Dictionary<Colour, PlayerViewModel>()
+            Players = new ReadOnlyDictionary<Colour, PlayerViewModel>(new Dictionary<Colour, PlayerViewModel>(3)
             {
                 { Colour.White, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, false) },
                 { Colour.Black, new AIPlayerViewModel(this, dispatcherService, new RandomChessAI()) },
                 { Colour.White | Colour.Black, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, true) },
-            };
-            NotifyPlayersForNewTurn();
+            });
+            ClockViewModel whiteClockVM = new(ClockParametersConsts.Bullet1Plus0);
+            ClockViewModel blackClockVM = new(ClockParametersConsts.Bullet1Plus0);
+            Clocks = new ReadOnlyDictionary<Colour, ClockViewModel>(new Dictionary<Colour, ClockViewModel>(2)
+            {
+                { Colour.White, whiteClockVM },
+                { Colour.Black, blackClockVM }
+            });
+            whiteClockVM.CountdownFinished += OnWhiteClockVMCountdownFinished;
+            blackClockVM.CountdownFinished += OnBlackClockVMCountdownFinished;
+            PossibleMovements = new List<Movement>(0);
+        }
+
+        protected void Start()
+        {
+            if (IsStarted)
+            {
+                throw new InvalidOperationException("The game is already started.");
+            }
+            IsStarted = true;
+            UpdateGameInformations(false);
+            UpdateViewModels();
         }
 
         protected void Do(Movement movement)
@@ -111,24 +141,8 @@ namespace ChessEngine.MVVM.ViewModels
             }
             MovementMigrator.Up(Game, movement);
             MovementHistory.Push(movement);
-            CanUndo = true;
             MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Up));
-            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
-            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
-            EndGameType = EndGameChecker.CheckEndGame(Game, attackData, PossibleMovements).Type;
-        }
-
-        protected void Undo()
-        {
-            Movement movement = MovementHistory.Pop();
-            MovementMigrator.Down(Game, movement);
-            CanUndo = MovementHistory.Any();
-            MovementExecuted?.Invoke(this, new MovementExecutionEventArgs(movement, MovementExecutionDirection.Down));
-            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
-            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
-            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
-            EndGameType = EndGameType.GameIsNotFinished;
+            UpdateGameInformations(false);
         }
 
         protected virtual void TreatDoRequest(Movement request)
@@ -140,40 +154,55 @@ namespace ChessEngine.MVVM.ViewModels
             Movement? movement = movementsOnPosition.Any() ? (movementsOnPosition.Count() == 1 ? movementsOnPosition.First() : movementsOnPosition.First(move => move.Flag == request.Flag)) : null;
             if (movement is null) { return; }
             Do(movement.Value);
+            UpdateViewModels();
+        }
+
+        protected void UpdateGameInformations(bool isUndo)
+        {
+            AttackData attackData = AttackDataGenerator.GenerateAttackData(Game);
+            PossibleMovements = new ReadOnlyCollection<Movement>(MovementGenerator.GenerateMovements(Game, attackData));
+            CheckedPosition = attackData.IsCheck ? Game.Board[Game.CurrentPlayer] : BoardConsts.NoPosition;
+            EndGameType = isUndo ? EndGameType.GameIsNotFinished : EndGameChecker.CheckEndGame(Game, attackData, PossibleMovements).Type;
+        }
+
+        protected void UpdateViewModels()
+        {
             if (EndGameType == EndGameType.GameIsNotFinished)
             {
-                NotifyPlayersForNewTurn();
+                Clocks[Game.OpponentPlayer].PauseCommand.Execute(null);
+                if (MovementHistory.Count > 0)
+                {
+                    Clocks[Game.OpponentPlayer].IncrementCommand.Execute(null);
+                    Players[Game.OpponentPlayer].OnTurnToPlayEnded();
+                }
+                Players[Game.OpponentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
+                Players[Game.CurrentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
+                Players[Game.CurrentPlayer].MovementFound += OnCurrentPlayerPlayMovement;
+                Clocks[Game.CurrentPlayer].StartCommand.Execute(null);
+                Players[Game.CurrentPlayer].OnTurnToPlayBegan();
             }
-        }
-
-        protected void TreatUndoRequest()
-        {
-            if (CanUndo)
+            else
             {
-                Undo();
-                if (Players[Game.CurrentPlayer] is AIPlayerViewModel)
+                foreach (ClockViewModel clockVM in Clocks.Values)
                 {
-                    Undo();
-                }
-                if (EndGameType == EndGameType.GameIsNotFinished)
-                {
-                    NotifyPlayersForNewTurn();
+                    clockVM.PauseCommand.Execute(null);
                 }
             }
-        }
-
-        protected virtual void NotifyPlayersForNewTurn()
-        {
-            Players[Game.OpponentPlayer].OnTurnToPlayEnded();
-            Players[Game.OpponentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
-            Players[Game.CurrentPlayer].MovementFound -= OnCurrentPlayerPlayMovement;
-            Players[Game.CurrentPlayer].MovementFound += OnCurrentPlayerPlayMovement;
-            Players[Game.CurrentPlayer].OnTurnToPlayBegan();
         }
 
         protected void OnCurrentPlayerPlayMovement(object? sender, MovementFindingEventArgs eventArgs)
         {
             TreatDoRequest(eventArgs.Movement);
+        }
+
+        protected void OnBlackClockVMCountdownFinished(object? sender, CountdownFinishedEventArgs eventArgs)
+        {
+            EndGameType = EndGameType.BlackHasFlagFall;
+        }
+
+        protected void OnWhiteClockVMCountdownFinished(object? sender, CountdownFinishedEventArgs eventArgs)
+        {
+            EndGameType = EndGameType.WhiteHasFlagFall;
         }
     }
 }

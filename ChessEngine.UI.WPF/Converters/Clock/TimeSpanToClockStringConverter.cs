@@ -1,17 +1,17 @@
-﻿using ChessEngine.MVVM.Models;
-using ChessEngine.MVVM.Utils;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace ChessEngine.UI.WPF.Converters.Clock
 {
-    public class ClockParametersToStringConverter : IValueConverter
+    public class TimeSpanToClockStringConverter : IValueConverter
     {
+        protected static readonly TimeSpan TwentySeconds = TimeSpan.FromSeconds(20);
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            ClockParameters clockParameters = (ClockParameters)value;
-            return clockParameters == ClockParametersConsts.InfiniteTime ? "∞" : $"{clockParameters.BaseTime.TotalMinutes} + {clockParameters.IncrementTime.TotalSeconds}";
+            TimeSpan timeSpan = (TimeSpan)value;
+            return timeSpan >= TwentySeconds ? $"{TimeSpan.FromSeconds(Math.Truncate(timeSpan.TotalSeconds)):mm\\:ss}" : $"{timeSpan:mm\\:ss\\.f}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

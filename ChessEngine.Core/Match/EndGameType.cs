@@ -23,6 +23,10 @@
         BlackWon = WhiteIsCheckmated | WhiteHasResigned | WhiteHasFlagFall,
         Draw = DrawOnStalemate | DrawOnDeadPosition | DrawOnAgreement | DrawOnThreefoldRepetition | DrawOnFivefoldRepetition | DrawOnFiftyMove | DrawOnSeventyFiveMove,
 
+        Checkmate = BlackIsCheckmated | WhiteIsCheckmated,
+        Resign = BlackHasResigned | WhiteHasResigned,
+        Flagfall = BlackHasFlagFall | WhiteHasFlagFall,
+
         GameIsFinished = WhiteWon | BlackWon | Draw
     }
 }

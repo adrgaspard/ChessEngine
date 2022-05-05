@@ -1,8 +1,8 @@
 ﻿using ChessEngine.Core.Utils;
 using ChessEngine.MVVM.Models;
+using ChessEngine.MVVM.Utils;
 using ChessEngine.MVVM.ViewModels.Abstractions;
 using Microsoft.Toolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -10,32 +10,13 @@ namespace ChessEngine.MVVM.ViewModels
 {
     public class ClockViewModel : ViewModelBase
     {
-        public static readonly ClockParameters InfiniteClockParameters = new(TimeSpan.MaxValue, TimeSpan.MaxValue);
-
-        public IReadOnlyList<ClockParameters> PredefinedClockParameters { get; protected init; }
-
         protected Clock Clock { get; init; }
 
         public TimeSpan RemainingTime => Clock.RemainingTime;
 
-        protected ClockParameters clockParameters;
-        public ClockParameters ClockParameters
-        {
-            get => clockParameters;
-            protected set
-            {
-                if (clockParameters != value)
-                {
-                    clockParameters = value;
-                    Reset();
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(RemainingTime));
-                    RaisePropertyChanged(nameof(IsInfiniteTime));
-                }
-            }
-        }
+        public ClockParameters ClockParameters { get; protected init; }
 
-        public bool IsInfiniteTime => ClockParameters == InfiniteClockParameters;
+        public bool IsInfiniteTime => ClockParameters == ClockParametersConsts.InfiniteTime;
 
         public ICommand StartCommand { get; protected init; }
 
@@ -45,26 +26,13 @@ namespace ChessEngine.MVVM.ViewModels
 
         public ICommand ResetCommand { get; protected init; }
 
-        public event EventHandler<CountdownFinishedEventArgs>? CountdownFinished;
+        public event CountdownFinishedEventHandler? CountdownFinished;
 
-        public ClockViewModel()
+        public ClockViewModel(ClockParameters clockParameters, int refreshRateInMs = 50)
         {
-            PredefinedClockParameters = new ReadOnlyCollection<ClockParameters>(new List<ClockParameters>()
-            {
-                new(TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(0)),
-                new(TimeSpan.FromMinutes(2), TimeSpan.FromSeconds(1)),
-                new(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(0)),
-                new(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(2)),
-                new(TimeSpan.FromMinutes(5), TimeSpan.FromSeconds(0)),
-                new(TimeSpan.FromMinutes(5), TimeSpan.FromSeconds(3)),
-                new(TimeSpan.FromMinutes(10), TimeSpan.FromSeconds(0)),
-                new(TimeSpan.FromMinutes(10), TimeSpan.FromSeconds(5)),
-                new(TimeSpan.FromMinutes(15), TimeSpan.FromSeconds(10)),
-                new(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(0)),
-                new(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(20)),
-                InfiniteClockParameters
-            });
-            Clock = new(100);
+            ClockParameters = clockParameters;
+            Clock = new(refreshRateInMs);
+            Reset();
             Clock.PropertyChanged += OnClockPropertyChanged;
             Clock.CountdownFinished += OnClockCountdownFinished;
             StartCommand = new RelayCommand(Start);
@@ -80,19 +48,23 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected void Pause()
         {
-            Clock.Stop();
+            Clock.Pause();
         }
 
         protected void Increment()
         {
-            Clock.Stop();
+            bool active = Clock.IsActivated;
+            Clock.Pause();
             Clock.Add(ClockParameters.IncrementTime);
-            Clock.Start();
+            if (active)
+            {
+                Clock.Start();
+            }
         }
 
         protected void Reset()
         {
-            Clock.Stop();
+            Clock.Pause();
             Clock.Set(ClockParameters.BaseTime);
         }
 
