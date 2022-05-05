@@ -4,15 +4,15 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Board
 {
-    public class PieceTypeToPackIconFontAwesomeKindConverter : IValueConverter
+    public class PieceTypeToPackIconFAKindConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is PieceType chessPieceType)
+            if (value is PieceType pieceType)
             {
-                return chessPieceType switch
+                return pieceType switch
                 {
                     PieceType.King => PackIconFontAwesomeKind.ChessKingSolid,
                     PieceType.Pawn => PackIconFontAwesomeKind.ChessPawnSolid,
@@ -20,7 +20,7 @@ namespace ChessEngine.UI.WPF.Converters
                     PieceType.Bishop => PackIconFontAwesomeKind.ChessBishopSolid,
                     PieceType.Rook => PackIconFontAwesomeKind.ChessRookSolid,
                     PieceType.Queen => PackIconFontAwesomeKind.ChessQueenSolid,
-                    _ => throw new NotSupportedException($"The value {chessPieceType} is not supported."),
+                    _ => throw new NotSupportedException($"The value {pieceType} is not supported."),
                 };
             }
             throw new ArgumentException($"The value is not a {nameof(PieceType)}");

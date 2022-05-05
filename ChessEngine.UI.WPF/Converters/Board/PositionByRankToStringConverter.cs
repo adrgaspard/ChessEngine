@@ -1,17 +1,15 @@
-﻿using System;
+﻿using ChessEngine.Core.Environment;
+using System;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Board
 {
-    public class SelectedBoolToColorConverter : IValueConverter
+    public class PositionByRankToStringConverter : IValueConverter
     {
-        public static readonly Color SelectedColor = Color.FromArgb(0xFF, 0x40, 0xCF, 0xCF);
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (bool)value ? SelectedColor : Colors.Transparent;
+            return (((Position)value).Rank + 1).ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -2,12 +2,7 @@
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels.Abstractions;
 using Microsoft.Toolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ChessEngine.MVVM.ViewModels

@@ -7,7 +7,6 @@ using ChessEngine.Core.Serialization.FEN.Tools;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;

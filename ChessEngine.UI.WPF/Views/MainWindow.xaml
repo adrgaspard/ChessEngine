@@ -5,7 +5,7 @@
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
                       xmlns:local="clr-namespace:ChessEngine.UI.WPF.Views"
-                      xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters"
+                      xmlns:hashconverter="clr-namespace:ChessEngine.UI.WPF.Converters.Hash"
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                       xmlns:boardControls="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Board"
                       mc:Ignorable="d"
@@ -21,8 +21,7 @@
         </DataTemplate>
     </controls:MetroWindow.IconTemplate>
     <Window.Resources>
-        <converter:PieceTypeToPackIconFontAwesomeKindConverter x:Key="chessPieceTypeToFAKindConverter" />
-        <converter:UlongToBitStringConverter x:Key="ulongToBitStringConverter" />
+        <hashconverter:UlongToBitStringConverter x:Key="ulongToBitStringConverter" />
     </Window.Resources>
     <DockPanel DataContext="{Binding Path=GameVM, Source={StaticResource ResourceKey=Locator}}">
         <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >

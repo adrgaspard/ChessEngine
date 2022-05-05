@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Hash
 {
-    public class MarkedBoolToColorConverter : IValueConverter
+    public class UlongToBitStringConverter : IValueConverter
     {
-        public static readonly Color MarkedColor = Color.FromArgb(0xC0, 0xFC, 0xE8, 0x4C);
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (bool)value ? MarkedColor : Colors.Transparent;
+            return System.Convert.ToString((long)(ulong)value, 2).PadLeft(64, '0');
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

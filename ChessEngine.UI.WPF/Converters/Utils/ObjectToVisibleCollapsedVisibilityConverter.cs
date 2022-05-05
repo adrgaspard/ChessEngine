@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
-using System.Windows.Media;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Utils
 {
-    public class HighlightedBoolToColorConverter : IValueConverter
+    public class ObjectToVisibleCollapsedVisibilityConverter : IValueConverter
     {
-        public static readonly Color HighlightedColor = Color.FromArgb(0xE0, 0x34, 0x66, 0xE3);
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (bool)value ? HighlightedColor : Colors.Transparent;
+            return value is null ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

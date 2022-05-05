@@ -1,7 +1,7 @@
 ﻿using ChessEngine.Core.Environment;
 using ChessEngine.Core.Environment.Tools;
 using ChessEngine.Core.Interactions;
-using ChessEngine.MVVM.Models;
+using ChessEngine.MVVM.ViewModels;
 using ChessEngine.UI.WPF.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,21 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 {
     public partial class BoardUC : UserControl
     {
+        public static readonly DependencyProperty PointOfViewProperty = DependencyProperty.Register(nameof(PointOfView), typeof(Colour), typeof(BoardUC), new PropertyMetadata(OnPointOfViewPropertyChanged));
+
+        public Colour PointOfView
+        {
+            get => (Colour)GetValue(PointOfViewProperty);
+            set
+            {
+                if (PointOfView != value)
+                {
+                    SetValue(PointOfViewProperty, value);
+                    UpdateBoardPointOfView();
+                }
+            }
+        }
+
         protected WPFGameViewModel? GameVM { get; set; }
 
         protected Panel RootElement { get; init; }
@@ -22,6 +37,8 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
         protected Grid Grid { get; init; }
 
         protected Canvas Canvas { get; init; }
+
+        protected IDictionary<Position, PositionUC> Childrens { get; set; }
 
         protected bool IsMouseDown { get; set; }
 
@@ -39,25 +56,11 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 
         protected Movement InitialRequest { get; set; }
 
-        public static readonly DependencyProperty PointOfViewProperty = DependencyProperty.Register(nameof(PointOfView), typeof(Colour), typeof(BoardUC), new PropertyMetadata(OnPointOfViewPropertyChanged));
-
-        public Colour PointOfView
-        {
-            get => (Colour)GetValue(PointOfViewProperty);
-            set
-            {
-                if (PointOfView != value)
-                {
-                    SetValue(PointOfViewProperty, value);
-                    UpdateBoardPointOfView();
-                }
-            }
-        }
-
         public BoardUC()
         {
-            DataContextChanged += OnDataContextChanged;
             InitializeComponent();
+            Childrens = new Dictionary<Position, PositionUC>();
+            DataContextChanged += OnDataContextChanged;
             RootElement = LogicalTreeHelper.GetChildren(this).Cast<Panel>().First();
             IList<Panel> panels = LogicalTreeHelper.GetChildren(RootElement).Cast<Panel>().ToList();
             Grid = (Grid)panels.First(panel => panel.GetType() == typeof(Grid));
@@ -67,12 +70,13 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 Grid.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
                 Grid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) });
             }
-            PointOfView = Colour.Black;
+            PointOfView = Colour.White;
         }
 
         protected void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs eventArgs)
         {
             Grid.Children.Clear();
+            Childrens.Clear();
             if (eventArgs.OldValue is WPFGameViewModel oldGameVM)
             {
                 oldGameVM.PropertyChanged -= OnGameVMPropertyChanged;
@@ -87,6 +91,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                     {
                         PositionUC child = new(GameVM.PositionVMList[i][j]);
                         Grid.Children.Add(child);
+                        Childrens.Add(new(i, j), child);
                     }
                 }
                 UpdateBoardPointOfView();
@@ -97,10 +102,12 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
         {
             if (eventArgs.PropertyName == nameof(WPFGameViewModel.NeedPromotionTypeSpecification) && GameVM.NeedPromotionTypeSpecification)
             {
-                PromotionPopup promotionPopup = new();
+                PromotionViewModel promotionVM = new();
+                PromotionPopup promotionPopup = new(promotionVM);
                 promotionPopup.Owner = Window.GetWindow(this);
+                Childrens[InitialRequest.NewPosition].UpdatePieceUCFromPiece(new(PieceType.Pawn, GameVM.Game.CurrentPlayer));
                 promotionPopup.ShowDialog();
-                MovementFlag flag = (Application.Current.Resources["Locator"] as ViewModelLocator).PromotionVM.SelectedPromotionType switch
+                MovementFlag flag = promotionVM.SelectedPromotionType switch
                 {
                     PieceType.Knight => MovementFlag.PawnPromotionToKnight,
                     PieceType.Bishop => MovementFlag.PawnPromotionToBishop,
@@ -110,7 +117,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 };
                 GameVM.TreatChessMovementRequestCommand.Execute(new Movement(InitialRequest.OldPosition, InitialRequest.NewPosition, flag));
             }
-            
+
         }
 
         protected static void OnPointOfViewPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs eventArgs)
@@ -189,7 +196,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                         IsSelected = false;
                         InitialRequest = new(clickedPositionUC.PositionVM.Position, positionUC.PositionVM.Position, MovementFlag.None);
                         GameVM.TreatChessMovementRequestCommand.Execute(InitialRequest);
-                        clickedPositionUC.UpdatePieceUC();
+                        clickedPositionUC.UpdatePieceUCFromViewModel();
                     }
                     else
                     {
@@ -199,10 +206,10 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 else
                 {
                     Canvas.Children.Remove(SelectedPieceUC);
+                    IsSelected = false;
                     InitialRequest = new(clickedPositionUC.PositionVM.Position, positionUC.PositionVM.Position, MovementFlag.None);
                     GameVM.TreatChessMovementRequestCommand.Execute(InitialRequest);
-                    clickedPositionUC.UpdatePieceUC();
-                    IsSelected = false;
+                    clickedPositionUC.UpdatePieceUCFromViewModel();
                     IsDragAndDrop = false;
                 }
             }
@@ -220,7 +227,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 }
                 if (SelectedPieceUC is null) { return; }
                 Canvas.Children.Remove(SelectedPieceUC);
-                ClickedPositionUC.UpdatePieceUC();
+                ClickedPositionUC.UpdatePieceUCFromViewModel();
                 SelectedPieceUC = null;
                 IsSelected = false;
                 return;

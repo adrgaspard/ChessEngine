@@ -1,16 +1,15 @@
-﻿using ChessEngine.Core.Environment;
-using System;
+﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Utils
 {
-    public class PositionByFileToStringConverter : IValueConverter
+    public class BoolToVisibleCollapsedVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            sbyte file = ((Position)value).File;
-            return ((char)('a' + file)).ToString();
+            return (bool)value ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,4 +1,5 @@
-﻿using ChessEngine.Core.Environment.Tools;
+﻿using ChessEngine.Core.Environment;
+using ChessEngine.Core.Environment.Tools;
 using ChessEngine.UI.WPF.ViewModels;
 using System;
 using System.ComponentModel;
@@ -8,9 +9,6 @@ using System.Windows.Controls;
 
 namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 {
-    /// <summary>
-    /// Logique d'interaction pour PositionUC.xaml
-    /// </summary>
     public partial class PositionUC : UserControl
     {
         public WPFPositionViewModel PositionVM { get; protected init; }
@@ -33,7 +31,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
             DataContextChanged += OnDataContextChanged;
             RootElement = LogicalTreeHelper.GetChildren(this).Cast<Panel>().First();
             Control = LogicalTreeHelper.GetChildren(RootElement).Cast<FrameworkElement>().Where(element => element.GetType() == typeof(UserControl)).Cast<UserControl>().First();
-            UpdatePieceUC();
+            UpdatePieceUCFromViewModel();
             PositionVM.PropertyChanged += OnPositionVMPropertyChanged;
         }
 
@@ -41,7 +39,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
         {
             if (eventArgs.PropertyName == nameof(WPFPositionViewModel.Piece))
             {
-                UpdatePieceUC();
+                UpdatePieceUCFromViewModel();
             }
         }
 
@@ -50,9 +48,14 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
             throw new NotSupportedException("The datacontext can't be changed");
         }
 
-        public void UpdatePieceUC()
+        public void UpdatePieceUCFromViewModel()
         {
             PieceUC = PositionVM.Piece == PieceConsts.NoPiece ? null : new(PositionVM.Piece);
+        }
+
+        public void UpdatePieceUCFromPiece(Piece piece)
+        {
+            PieceUC = piece == PieceConsts.NoPiece ? null : new(piece);
         }
     }
 }

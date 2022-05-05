@@ -1,14 +1,16 @@
-﻿using System;
+﻿using ChessEngine.Core.Environment;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace ChessEngine.UI.WPF.Converters
+namespace ChessEngine.UI.WPF.Converters.Board
 {
-    public class UlongToBitStringConverter : IValueConverter
+    public class PositionByFileToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return System.Convert.ToString((long)(ulong)value, 2).PadLeft(64, '0');
+            sbyte file = ((Position)value).File;
+            return ((char)('a' + file)).ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

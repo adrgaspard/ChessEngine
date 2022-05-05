@@ -8,9 +8,6 @@ using System.Windows.Media;
 
 namespace ChessEngine.UI.WPF.Views.CustomControls.Board
 {
-    /// <summary>
-    /// Logique d'interaction pour PieceUC.xaml
-    /// </summary>
     public partial class PieceUC : UserControl
     {
         protected Panel RootElement { get; init; }
