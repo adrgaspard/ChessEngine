@@ -1,5 +1,4 @@
-﻿using ChessEngine.Core.AI;
-using ChessEngine.Core.Environment;
+﻿using ChessEngine.Core.Environment;
 using ChessEngine.Core.Environment.Tools;
 using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Interactions.Contracts;
@@ -9,7 +8,6 @@ using ChessEngine.Core.Match;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.Core.Utils;
 using ChessEngine.MVVM.Models;
-using ChessEngine.MVVM.Utils;
 using ChessEngine.MVVM.ViewModels.Abstractions;
 using Microsoft.Toolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
