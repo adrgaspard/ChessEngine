@@ -35,8 +35,11 @@ namespace ChessEngine.MVVM.ViewModels
             ClockParameters = clockParameters;
             Clock = new(refreshRateInMs);
             Reset();
-            Clock.PropertyChanged += OnClockPropertyChanged;
-            Clock.CountdownFinished += OnClockCountdownFinished;
+            if (ClockParameters != ClockParametersConsts.InfiniteTime)
+            {
+                Clock.PropertyChanged += OnClockPropertyChanged;
+                Clock.CountdownFinished += OnClockCountdownFinished;
+            }
             StartCommand = new RelayCommand(Start);
             PauseCommand = new RelayCommand(Pause);
             IncrementCommand = new RelayCommand(Increment);
@@ -45,22 +48,31 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected void Start()
         {
-            Clock.Start();
+            if (ClockParameters != ClockParametersConsts.InfiniteTime)
+            {
+                Clock.Start();
+            }
         }
 
         protected void Pause()
         {
-            Clock.Pause();
+            if (ClockParameters != ClockParametersConsts.InfiniteTime)
+            {
+                Clock.Pause();
+            }
         }
 
         protected void Increment()
         {
-            bool active = Clock.IsActivated;
-            Clock.Pause();
-            Clock.Add(ClockParameters.IncrementTime);
-            if (active)
+            if (ClockParameters != ClockParametersConsts.InfiniteTime)
             {
-                Clock.Start();
+                bool active = Clock.IsActivated;
+                Clock.Pause();
+                Clock.Add(ClockParameters.IncrementTime);
+                if (active)
+                {
+                    Clock.Start();
+                }
             }
         }
 

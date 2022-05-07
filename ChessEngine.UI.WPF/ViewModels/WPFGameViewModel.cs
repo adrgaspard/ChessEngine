@@ -1,6 +1,7 @@
 ﻿using ChessEngine.Core.Environment;
 using ChessEngine.Core.Environment.Tools;
 using ChessEngine.Core.Interactions;
+using ChessEngine.Core.Interactions.Contracts;
 using ChessEngine.Core.Match;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
@@ -74,7 +75,9 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
-        public WPFGameViewModel(Game game, IGameHashing<ulong> gameHashing, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory) : base(game, gameHashing, playersFactory, clocksFactory)
+        public WPFGameViewModel(Game game, IAttackDataGenerator attackDataGenerator, IMovementGenerator movementGenerator, IMovementMigrator movementMigrator, IGameHashing<ulong> gameHashing,
+            IEndGameChecker endGameChecker, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory)
+            : base(game, attackDataGenerator, movementGenerator, movementMigrator, gameHashing, endGameChecker, playersFactory, clocksFactory)
         {
             List<IReadOnlyList<WPFPositionViewModel>> positionsVMList = new(BoardConsts.BoardSize);
             for (sbyte i = 0; i < BoardConsts.BoardSize; i++)

@@ -25,6 +25,10 @@ namespace ChessEngine.Core.Utils
         {
             get
             {
+                if (MaxTime == TimeSpan.MaxValue)
+                {
+                    return MaxTime;
+                }
                 double remainingTime = MaxTime.TotalMilliseconds - Stopwatch.ElapsedMilliseconds;
                 return remainingTime > 0 ? TimeSpan.FromMilliseconds(remainingTime) : TimeSpan.Zero;
             }

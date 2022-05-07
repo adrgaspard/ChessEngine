@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace ChessEngine.Core.Interactions.Generation.Caching
 {
-    public static partial class MovementGenerationCache
+    public static class MovementGenerationCache
     {
         private static readonly IReadOnlyDictionary<Position, IReadOnlyList<Movement>> KingClassicMovements;
         private static readonly IReadOnlyDictionary<Position, IReadOnlyList<Movement>> KingCastlingMovements;

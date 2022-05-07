@@ -11,6 +11,10 @@ namespace ChessEngine.UI.WPF.Converters.Clock
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             TimeSpan timeSpan = (TimeSpan)value;
+            if (timeSpan == TimeSpan.MaxValue)
+            {
+                return "∞";
+            }
             return timeSpan >= TwentySeconds || timeSpan == TimeSpan.Zero ? $"{TimeSpan.FromSeconds(Math.Truncate(timeSpan.TotalSeconds)):mm\\:ss}" : $"{timeSpan:mm\\:ss\\.f}";
         }
 

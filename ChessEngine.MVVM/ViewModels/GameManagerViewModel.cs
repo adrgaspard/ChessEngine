@@ -1,5 +1,8 @@
-﻿using ChessEngine.Core.AI;
+﻿using ChessEngine.AI;
 using ChessEngine.Core.Environment;
+using ChessEngine.Core.Interactions.Contracts;
+using ChessEngine.Core.Interactions.Generation;
+using ChessEngine.Core.Interactions.Migration;
 using ChessEngine.Core.Match;
 using ChessEngine.Core.Serialization.Contracts;
 using ChessEngine.Core.Serialization.FEN;
@@ -62,9 +65,25 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected IDispatcherService DispatcherService { get; init; }
 
+        protected AIFactory AIFactory { get; init; }
+
         protected IGameHashing<ulong> GameHashing { get; init; }
 
         protected IGameLoader<string> GameLoader { get; init; }
+
+        protected IMovementGenerator GameMovementGenerator { get; init; }
+
+        protected IMovementGenerator AIQuietMovementGenerator { get; init; }
+
+        protected IMovementGenerator AIMovementGenerator { get; init; }
+
+        protected IMovementMigrator GameMovementMigrator { get; init; }
+
+        protected IMovementMigrator AIMovementMigrator { get; init; }
+
+        protected IAttackDataGenerator AttackDataGenerator { get; init; }
+
+        protected IEndGameChecker EndGameChecker { get; init; }
 
         public ICommand StartCommand { get; protected init; }
 
@@ -78,6 +97,14 @@ namespace ChessEngine.MVVM.ViewModels
             ClockParameters = ClockParametersConsts.Blitz3Plus0;
             GameHashing = new ZobristHashing();
             GameLoader = new FENGameLoader(GameHashing);
+            AttackDataGenerator = new AttackDataGenerator();
+            GameMovementGenerator = new MovementGenerator(PromotionGenerationType.AllPromotions, true);
+            AIQuietMovementGenerator = new MovementGenerator(PromotionGenerationType.PromotionToQueenAndKnightOnly, false);
+            AIMovementGenerator = new MovementGenerator(PromotionGenerationType.PromotionToQueenAndKnightOnly, true);
+            GameMovementMigrator = new MovementMigrator(GameHashing, true);
+            AIMovementMigrator = new MovementMigrator(GameHashing, false);
+            EndGameChecker = new EndGameChecker();
+            AIFactory = new(AttackDataGenerator, AIQuietMovementGenerator, AIMovementGenerator, AIMovementMigrator);
             StartCommand = new RelayCommand(Start);
             InterruptCommand = new RelayCommand(Interrupt);
             ResetCommand = new RelayCommand(Reset);
@@ -116,7 +143,7 @@ namespace ChessEngine.MVVM.ViewModels
             return (gameVM) => new Dictionary<Colour, PlayerViewModel>(3)
             {
                 { Colour.White, new LocalHumanPlayerViewModel(gameVM, DispatcherService, Colour.White, false) },
-                { Colour.Black, new AIPlayerViewModel(gameVM, DispatcherService, new RandomChessAI()) },
+                { Colour.Black, new AIPlayerViewModel(gameVM, DispatcherService, AIFactory.GetAI_Version_5()) },
                 { Colour.White | Colour.Black, new LocalHumanPlayerViewModel(gameVM, DispatcherService, Colour.White, true) },
             };
         }
@@ -132,7 +159,7 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected virtual GameViewModel GenerateNewGameViewModel()
         {
-            return new(GameLoader.Load(FENConsts.StartFEN), GameHashing, GetPlayersFactory(), GetClocksFactory());
+            return new(GameLoader.Load(FENConsts.StartFEN), AttackDataGenerator, GameMovementGenerator, GameMovementMigrator, GameHashing, EndGameChecker, GetPlayersFactory(), GetClocksFactory());
         }
 
         protected void OnGameVMPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)

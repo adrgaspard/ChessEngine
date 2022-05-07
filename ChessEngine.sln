@@ -5,13 +5,13 @@ VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.Core", "ChessEngine.Core\ChessEngine.Core.csproj", "{0176D8A1-3335-4D9B-8661-ED0CA07A9F11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessEngine.Tests", "ChessEngine.Tests\ChessEngine.Tests.csproj", "{92B1BC6F-2161-4E31-8381-CEF6A003B0F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.Tests", "ChessEngine.Tests\ChessEngine.Tests.csproj", "{92B1BC6F-2161-4E31-8381-CEF6A003B0F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessEngine.UI.WPF", "ChessEngine.UI.WPF\ChessEngine.UI.WPF.csproj", "{2D9A7248-6DA3-44F6-9251-D07480C496EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.UI.WPF", "ChessEngine.UI.WPF\ChessEngine.UI.WPF.csproj", "{2D9A7248-6DA3-44F6-9251-D07480C496EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessEngine.AI.BranchAndBound", "ChessEngine.AI.BranchAndBound\ChessEngine.AI.BranchAndBound.csproj", "{74E6412D-AB0D-4FD9-9A06-C8901B5DE88C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.MVVM", "ChessEngine.MVVM\ChessEngine.MVVM.csproj", "{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessEngine.MVVM", "ChessEngine.MVVM\ChessEngine.MVVM.csproj", "{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.AI", "ChessEngine.AI\ChessEngine.AI.csproj", "{0C985113-BD36-4CFD-99B8-CB3E498B8203}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +31,14 @@ Global
 		{2D9A7248-6DA3-44F6-9251-D07480C496EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D9A7248-6DA3-44F6-9251-D07480C496EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D9A7248-6DA3-44F6-9251-D07480C496EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74E6412D-AB0D-4FD9-9A06-C8901B5DE88C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74E6412D-AB0D-4FD9-9A06-C8901B5DE88C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74E6412D-AB0D-4FD9-9A06-C8901B5DE88C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74E6412D-AB0D-4FD9-9A06-C8901B5DE88C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4EE7F0C-444F-4DA0-A30B-E37565AAEAB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

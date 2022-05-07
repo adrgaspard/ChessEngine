@@ -3,7 +3,6 @@ using ChessEngine.Core.Environment.Tools;
 using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Interactions.Contracts;
 using ChessEngine.Core.Interactions.Generation;
-using ChessEngine.Core.Interactions.Migration;
 using ChessEngine.Core.Match;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.Core.Utils;
@@ -93,23 +92,24 @@ namespace ChessEngine.MVVM.ViewModels
 
         public event EventHandler<MovementExecutionEventArgs>? MovementExecuted;
 
-        public GameViewModel(Game game, IGameHashing<ulong> gameHashing, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory)
+        public GameViewModel(Game game, IAttackDataGenerator attackDataGenerator, IMovementGenerator movementGenerator, IMovementMigrator movementMigrator, IGameHashing<ulong> gameHashing,
+            IEndGameChecker endGameChecker, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory)
         {
             HasStarted = false;
-            Game = game;
+            Game = game; ;
+            GameHashing = gameHashing;
+            MovementGenerator = movementGenerator;
+            AttackDataGenerator = attackDataGenerator;
+            MovementMigrator = movementMigrator;
+            EndGameChecker = endGameChecker;
             MovementHistory = new();
+            PossibleMovements = new List<Movement>(0);
             StartCommand = new RelayCommand(Start);
             InterruptCommand = new RelayCommand(Interrupt);
-            GameHashing = gameHashing;
-            MovementGenerator = new MovementGenerator();
-            MovementMigrator = new MovementMigrator(GameHashing, true);
-            AttackDataGenerator = new AttackDataGenerator();
-            EndGameChecker = new EndGameChecker();
             Players = new ReadOnlyDictionary<Colour, PlayerViewModel>(playersFactory.Invoke(this));
             Clocks = new ReadOnlyDictionary<Colour, ClockViewModel>(clocksFactory.Invoke());
             Clocks[Colour.White].CountdownFinished += OnWhiteClockVMCountdownFinished;
             Clocks[Colour.Black].CountdownFinished += OnBlackClockVMCountdownFinished;
-            PossibleMovements = new List<Movement>(0);
         }
 
         protected void Start()

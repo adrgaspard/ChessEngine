@@ -21,7 +21,7 @@ namespace ChessEngine.MVVM.ViewModels
             CancellationTokenSource cancellationTokenSource = CancellationTokenSource;
             Task.Run(() =>
             {
-                Movement movement = ChessAI.SelectMovement(GameVM.Game, GameVM.PossibleMovements, cancellationTokenSource.Token);
+                Movement movement = ChessAI.SelectMovement(GameVM.Game, cancellationTokenSource.Token);
                 if (!cancellationTokenSource.IsCancellationRequested)
                 {
                     InvokeMovementFound(movement);

@@ -12,7 +12,7 @@ namespace ChessEngine.UI.WPF.ViewModels
 
         protected override GameViewModel GenerateNewGameViewModel()
         {
-            return new WPFGameViewModel(GameLoader.Load(FENConsts.StartFEN), GameHashing, GetPlayersFactory(), GetClocksFactory());
+            return new WPFGameViewModel(GameLoader.Load(FENConsts.StartFEN), AttackDataGenerator, GameMovementGenerator, GameMovementMigrator, GameHashing, EndGameChecker, GetPlayersFactory(), GetClocksFactory());
         }
     }
 }

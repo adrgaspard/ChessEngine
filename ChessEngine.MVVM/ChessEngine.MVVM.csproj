@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChessEngine.AI\ChessEngine.AI.csproj" />
     <ProjectReference Include="..\ChessEngine.Core\ChessEngine.Core.csproj" />
   </ItemGroup>
 
