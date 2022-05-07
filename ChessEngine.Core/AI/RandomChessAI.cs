@@ -8,6 +8,7 @@ namespace ChessEngine.Core.AI
     {
         public Movement SelectMovement(Game game, IReadOnlyList<Movement> legalMovements, CancellationToken cancellationToken)
         {
+            //Task.Delay(10, cancellationToken).Wait(cancellationToken);
             return legalMovements[Randomizer.Instance.Next(legalMovements.Count)];
         }
     }

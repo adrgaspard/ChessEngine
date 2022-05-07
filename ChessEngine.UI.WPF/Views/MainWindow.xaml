@@ -6,11 +6,9 @@
                       xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
                       xmlns:local="clr-namespace:ChessEngine.UI.WPF.Views"
                       xmlns:commonconverter="clr-namespace:ChessEngine.UI.WPF.Converters.Utils"
-                      xmlns:clockconverter="clr-namespace:ChessEngine.UI.WPF.Converters.Clock"
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                      xmlns:boardControls="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Board"
                       mc:Ignorable="d"
-                      Title="{Binding Path=AppName}" Height="750" Width="900"
+                      Title="{Binding Path=AppName}" MinHeight="750" MinWidth="920"
                       DataContext="{Binding Path=MainVM, Source={StaticResource ResourceKey=Locator}}"
                       GlowBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
                       WindowTitleBrush="{Binding Path=AppColor, Converter={StaticResource ResourceKey=colorToBrushConverter}}"
@@ -24,41 +22,21 @@
     <Window.Resources>
         <commonconverter:BoolToVisibleCollapsedVisibilityConverter x:Key="boolToVisibilityConverter" />
         <commonconverter:BoolToCollapsedVisibleVisibilityConverter x:Key="boolToInvisibilityConverter" />
-        <clockconverter:TimeSpanToClockStringConverter x:Key="timeSpanToStringConverter" />
     </Window.Resources>
-    <DockPanel DataContext="{Binding Path=GameVM, Source={StaticResource ResourceKey=Locator}}">
-        <!--<TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,10,10,5" >
-                    <Run Text="Game end status :" Foreground="White"/>
-                    <Run Text="{Binding Path=EndGameType, Mode=OneWay}" Foreground="DeepSkyBlue" />
-        </TextBlock>
-        <TextBlock DockPanel.Dock="Top" Style="{StaticResource ResourceKey=customTextBlockStyle}" FontFamily="Consolas" FontWeight="Bold" Margin="10,5,10,10" >
-                    <Run Text="Hash Value :" Foreground="White"/>
-                    <Run Text="{Binding Path=Hash, Converter={StaticResource ResourceKey=ulongToBitStringConverter}, Mode=OneWay}"  Foreground="Red" />
-                    <Run Text="[" />
-                    <Run Text="{Binding Path=Hash, Mode=OneWay}" />
-                    <Run Text="]" />
-        </TextBlock>-->
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
-            <TextBlock Text="Actions :" Style="{StaticResource ResourceKey=customTextBlockStyle}" Padding="10,5,10,5" />
-            <Button Content="Start" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=StartCommand}" 
-                Visibility="{Binding Path=IsStarted, Converter={StaticResource ResourceKey=boolToInvisibilityConverter}}" Padding="10,5,10,5" />
-        </StackPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="250" />
-            </Grid.ColumnDefinitions>
-            <boardControls:BoardUC Grid.Column="0" Width="600" Height="600" PointOfView="{Binding Path=PlayerVM.PointOfView}" />
-            <StackPanel Orientation="Vertical" Grid.Column="1">
-                <TextBlock Style="{StaticResource ResourceKey=customTextBlockStyle}" FontSize="25">
-                    <Run Text="White time" />
-                    <Run Text="{Binding Path=Clocks[White].RemainingTime, Converter={StaticResource ResourceKey=timeSpanToStringConverter}, Mode=OneWay}" />
-                </TextBlock>
-                <TextBlock Style="{StaticResource ResourceKey=customTextBlockStyle}" FontSize="25">
-                    <Run Text="Black time" />
-                    <Run Text="{Binding Path=Clocks[Black].RemainingTime, Converter={StaticResource ResourceKey=timeSpanToStringConverter}, Mode=OneWay}" />
-                </TextBlock>
+    <DockPanel DataContext="{Binding Path=GameManagerVM, Source={StaticResource ResourceKey=Locator}}">
+        <Border DockPanel.Dock="Top" BorderBrush="White" BorderThickness="1" Margin="10">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <TextBlock Text="Development tool(s) :" Style="{StaticResource ResourceKey=customTextBlockStyle}" Padding="10,5,10,5" />
+                <Button Content="Start" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=StartCommand}" 
+                    Visibility="{Binding Path=CanStart, Converter={StaticResource ResourceKey=boolToVisibilityConverter}}" Padding="10,5,10,5" />
+                <Button Content="Interrupt" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=InterruptCommand}"
+                    Visibility="{Binding Path=CanInterrupt, Converter={StaticResource ResourceKey=boolToVisibilityConverter}}" Padding="10,5,10,5" />
+                <Button Content="Reset" Style="{StaticResource ResourceKey=customButtonStyle}" Command="{Binding Path=ResetCommand}" 
+                    Visibility="{Binding Path=CanReset, Converter={StaticResource ResourceKey=boolToVisibilityConverter}}" Padding="10,5,10,5" />
             </StackPanel>
-        </Grid>
+        </Border>
+        <Border DockPanel.Dock="Top" BorderBrush="White" BorderThickness="1" Margin="10,0,10,10">
+            <local:GameUC DataContext="{Binding Path=GameVM}" Margin="10" />
+        </Border>
     </DockPanel>
 </controls:MetroWindow>

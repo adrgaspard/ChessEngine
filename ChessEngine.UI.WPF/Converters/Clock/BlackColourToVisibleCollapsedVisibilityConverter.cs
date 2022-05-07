@@ -1,17 +1,16 @@
-﻿using System;
+﻿using ChessEngine.Core.Environment;
+using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 
 namespace ChessEngine.UI.WPF.Converters.Clock
 {
-    public class TimeSpanToClockStringConverter : IValueConverter
+    public class BlackColourToVisibleCollapsedVisibilityConverter : IValueConverter
     {
-        protected static readonly TimeSpan TwentySeconds = TimeSpan.FromSeconds(20);
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            TimeSpan timeSpan = (TimeSpan)value;
-            return timeSpan >= TwentySeconds || timeSpan == TimeSpan.Zero ? $"{TimeSpan.FromSeconds(Math.Truncate(timeSpan.TotalSeconds)):mm\\:ss}" : $"{timeSpan:mm\\:ss\\.f}";
+            return value is Colour.Black ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

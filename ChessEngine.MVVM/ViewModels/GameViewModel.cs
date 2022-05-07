@@ -39,15 +39,15 @@ namespace ChessEngine.MVVM.ViewModels
 
         public IReadOnlyDictionary<Colour, ClockViewModel> Clocks { get; protected init; }
 
-        protected bool isStarted;
-        public bool IsStarted
+        protected bool hasStarted;
+        public bool HasStarted
         {
-            get => isStarted;
+            get => hasStarted;
             protected set
             {
-                if (isStarted != value)
+                if (hasStarted != value)
                 {
-                    isStarted = value;
+                    hasStarted = value;
                     RaisePropertyChanged();
                 }
             }
@@ -91,45 +91,49 @@ namespace ChessEngine.MVVM.ViewModels
 
         public ICommand StartCommand { get; protected init; }
 
+        public ICommand InterruptCommand { get; protected init; }
+
         public event EventHandler<MovementExecutionEventArgs>? MovementExecuted;
 
-        public GameViewModel(Game game, IGameHashing<ulong> gameHashing, IDispatcherService dispatcherService)
+        public GameViewModel(Game game, IGameHashing<ulong> gameHashing, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory)
         {
-            IsStarted = false;
+            HasStarted = false;
             Game = game;
             MovementHistory = new();
             StartCommand = new RelayCommand(Start);
+            InterruptCommand = new RelayCommand(Interrupt);
             GameHashing = gameHashing;
             MovementGenerator = new MovementGenerator();
             MovementMigrator = new MovementMigrator(GameHashing, true);
             AttackDataGenerator = new AttackDataGenerator();
             EndGameChecker = new EndGameChecker();
-            Players = new ReadOnlyDictionary<Colour, PlayerViewModel>(new Dictionary<Colour, PlayerViewModel>(3)
-            {
-                { Colour.White, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, false) },
-                { Colour.Black, new AIPlayerViewModel(this, dispatcherService, new RandomChessAI()) },
-                { Colour.White | Colour.Black, new LocalHumanPlayerViewModel(this, dispatcherService, Colour.White, true) },
-            });
-            ClockViewModel whiteClockVM = new(ClockParametersConsts.Bullet1Plus0);
-            ClockViewModel blackClockVM = new(ClockParametersConsts.Bullet1Plus0);
-            Clocks = new ReadOnlyDictionary<Colour, ClockViewModel>(new Dictionary<Colour, ClockViewModel>(2)
-            {
-                { Colour.White, whiteClockVM },
-                { Colour.Black, blackClockVM }
-            });
-            whiteClockVM.CountdownFinished += OnWhiteClockVMCountdownFinished;
-            blackClockVM.CountdownFinished += OnBlackClockVMCountdownFinished;
+            Players = new ReadOnlyDictionary<Colour, PlayerViewModel>(playersFactory.Invoke(this));
+            Clocks = new ReadOnlyDictionary<Colour, ClockViewModel>(clocksFactory.Invoke());
+            Clocks[Colour.White].CountdownFinished += OnWhiteClockVMCountdownFinished;
+            Clocks[Colour.Black].CountdownFinished += OnBlackClockVMCountdownFinished;
             PossibleMovements = new List<Movement>(0);
         }
 
         protected void Start()
         {
-            if (IsStarted)
+            if (HasStarted)
             {
                 throw new InvalidOperationException("The game is already started.");
             }
-            IsStarted = true;
+            HasStarted = true;
             UpdateGameInformations(false);
+            UpdateViewModels();
+        }
+
+        protected void Interrupt()
+        {
+            if (!HasStarted)
+            {
+                throw new InvalidOperationException("The game is not started.");
+            }
+            PossibleMovements = new List<Movement>(0);
+            CheckedPosition = BoardConsts.NoPosition;
+            EndGameType = EndGameType.DrawOnInterruption;
             UpdateViewModels();
         }
 
@@ -183,6 +187,8 @@ namespace ChessEngine.MVVM.ViewModels
             }
             else
             {
+                Players[Game.CurrentPlayer].OnTurnToPlayEnded();
+                Players[Game.OpponentPlayer].OnTurnToPlayEnded();
                 foreach (ClockViewModel clockVM in Clocks.Values)
                 {
                     clockVM.PauseCommand.Execute(null);

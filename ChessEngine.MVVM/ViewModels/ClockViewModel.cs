@@ -14,6 +14,8 @@ namespace ChessEngine.MVVM.ViewModels
 
         public TimeSpan RemainingTime => Clock.RemainingTime;
 
+        public bool IsActivated => Clock.IsActivated;
+
         public ClockParameters ClockParameters { get; protected init; }
 
         public bool IsInfiniteTime => ClockParameters == ClockParametersConsts.InfiniteTime;
@@ -70,7 +72,7 @@ namespace ChessEngine.MVVM.ViewModels
 
         protected void OnClockPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
         {
-            RaisePropertyChanged(nameof(RemainingTime));
+            RaisePropertyChanged(eventArgs.PropertyName ?? "");
         }
 
         protected void OnClockCountdownFinished(object? sender, CountdownFinishedEventArgs eventArgs)

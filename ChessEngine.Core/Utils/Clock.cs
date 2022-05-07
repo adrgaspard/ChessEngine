@@ -95,6 +95,7 @@ namespace ChessEngine.Core.Utils
             {
                 Timer.Enabled = false;
                 Stopwatch.Stop();
+                PropertyChanged?.Invoke(this, new(nameof(IsActivated)));
                 CountdownFinished?.Invoke(this, new());
             }
         }

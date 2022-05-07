@@ -96,6 +96,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                 }
                 UpdateBoardPointOfView();
             }
+            Focus();
         }
 
         protected void OnGameVMPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
@@ -143,7 +144,7 @@ namespace ChessEngine.UI.WPF.Views.CustomControls.Board
                         Grid.SetColumn(positionUC, BoardConsts.BoardSize - positionUC.PositionVM.Position.File - 1);
                         break;
                     default:
-                        throw new NotSupportedException($"{PointOfView} is not supported by {nameof(BoardUC)}.");
+                        break;
                 }
             }
         }

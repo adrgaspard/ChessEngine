@@ -2,12 +2,10 @@
 using ChessEngine.Core.Environment.Tools;
 using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Match;
-using ChessEngine.Core.Serialization.FEN;
-using ChessEngine.Core.Serialization.FEN.Tools;
 using ChessEngine.Core.Transposition.Contracts;
 using ChessEngine.MVVM.Models;
 using ChessEngine.MVVM.ViewModels;
-using ChessEngine.UI.WPF.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -76,7 +74,7 @@ namespace ChessEngine.UI.WPF.ViewModels
             }
         }
 
-        public WPFGameViewModel(IGameHashing<ulong> gameHashing) : base(new FENGameLoader(gameHashing).Load(FENConsts.StartFEN), gameHashing, new DispatcherService(App.Current.Dispatcher))
+        public WPFGameViewModel(Game game, IGameHashing<ulong> gameHashing, Func<GameViewModel, IDictionary<Colour, PlayerViewModel>> playersFactory, Func<IDictionary<Colour, ClockViewModel>> clocksFactory) : base(game, gameHashing, playersFactory, clocksFactory)
         {
             List<IReadOnlyList<WPFPositionViewModel>> positionsVMList = new(BoardConsts.BoardSize);
             for (sbyte i = 0; i < BoardConsts.BoardSize; i++)

@@ -18,10 +18,11 @@
         DrawOnFivefoldRepetition = 1024,
         DrawOnFiftyMove = 2048,
         DrawOnSeventyFiveMove = 4096,
+        DrawOnInterruption = 8192,
 
         WhiteWon = BlackIsCheckmated | BlackHasResigned | BlackHasFlagFall,
         BlackWon = WhiteIsCheckmated | WhiteHasResigned | WhiteHasFlagFall,
-        Draw = DrawOnStalemate | DrawOnDeadPosition | DrawOnAgreement | DrawOnThreefoldRepetition | DrawOnFivefoldRepetition | DrawOnFiftyMove | DrawOnSeventyFiveMove,
+        Draw = DrawOnStalemate | DrawOnDeadPosition | DrawOnAgreement | DrawOnThreefoldRepetition | DrawOnFivefoldRepetition | DrawOnFiftyMove | DrawOnSeventyFiveMove | DrawOnInterruption,
 
         Checkmate = BlackIsCheckmated | WhiteIsCheckmated,
         Resign = BlackHasResigned | WhiteHasResigned,

@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="ChessEngine.UI.WPF.Views.CustomControls.Clock.ClockManagerUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChessEngine.UI.WPF.Views.CustomControls.Clock"
+             xmlns:converter="clr-namespace:ChessEngine.UI.WPF.Converters.Clock"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <converter:WhiteColourToVisibleCollapsedVisibilityConverter x:Key="whiteColourToVisibilityConverter" />
+        <converter:BlackColourToVisibleCollapsedVisibilityConverter x:Key="blackColourToVisibilityConverter" />
+    </UserControl.Resources>
+    <Border BorderBrush="White" BorderThickness="1">
+        <StackPanel>
+            <local:ClockUC Grid.Row="0" DataContext="{Binding Path=Clocks[Black]}" Margin="5,25,5,25"
+                           Visibility="{Binding Path=DataContext.PlayerVM.PointOfView, Converter={StaticResource ResourceKey=whiteColourToVisibilityConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type StackPanel}}}" />
+            <local:ClockUC Grid.Row="0" DataContext="{Binding Path=Clocks[White]}" Margin="5,25,5,25"
+                           Visibility="{Binding Path=DataContext.PlayerVM.PointOfView, Converter={StaticResource ResourceKey=blackColourToVisibilityConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type StackPanel}}}" />
+            <Border BorderBrush="White" BorderThickness="0,1,0,0"/>
+            <local:ClockUC Grid.Row="1" DataContext="{Binding Path=Clocks[White]}" Margin="5,25,5,25"
+                           Visibility="{Binding Path=DataContext.PlayerVM.PointOfView, Converter={StaticResource ResourceKey=whiteColourToVisibilityConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type StackPanel}}}" />
+            <local:ClockUC Grid.Row="1" DataContext="{Binding Path=Clocks[Black]}" Margin="5,25,5,25"
+                           Visibility="{Binding Path=DataContext.PlayerVM.PointOfView, Converter={StaticResource ResourceKey=blackColourToVisibilityConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type StackPanel}}}" />
+        </StackPanel>
+    </Border>
+</UserControl>
