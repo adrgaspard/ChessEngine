@@ -9,12 +9,14 @@ namespace ChessEngine.AI.Abstractions
 {
     public abstract class ResearcherBase : IResearcher
     {
-        protected const int NegativeInfinity = -2000000000;
-        protected const int PositiveInfinity = 2000000000;
-        protected const int LoseScore = -1000000000;
-        protected const int DrawScore = 0;
-        protected const int WinScore = 1000000000;
-        protected static readonly Movement NoMovement = new(BoardConsts.NoPosition, BoardConsts.NoPosition, MovementFlag.None);
+        public const int NegativeInfinity = -2000000000;
+        public const int PositiveInfinity = 2000000000;
+        public const int LoseScore = -1000000000;
+        public const int DrawScore = 0;
+        public const int WinScore = 1000000000;
+        protected const int MateMaximumDepth = 1000;
+
+        public static readonly Movement NoMovement = new(BoardConsts.NoPosition, BoardConsts.NoPosition, MovementFlag.None);
 
         public IEvaluator Evaluator { get; protected init; }
 
@@ -40,6 +42,15 @@ namespace ChessEngine.AI.Abstractions
             MovementMigrator = movementMigrator;
             CaptureAnalyst = captureAnalyst;
             BestFound = NoMovement;
+        }
+        public static bool IsMateScore(int score)
+        {
+            return Math.Abs(score) > WinScore - MateMaximumDepth;
+        }
+
+        public static int NumPlaysToMateFromScore(int score)
+        {
+            return WinScore - Math.Abs(score);
         }
 
         public Movement Search(Game game, int depth, CancellationToken token)

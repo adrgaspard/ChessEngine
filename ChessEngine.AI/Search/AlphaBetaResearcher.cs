@@ -5,11 +5,14 @@ using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Interactions.Contracts;
 using ChessEngine.Core.Interactions.Generation;
 using ChessEngine.Core.Match;
+using System.Diagnostics;
 
 namespace ChessEngine.AI.Search
 {
     public class AlphaBetaResearcher : SortedResearcherBase
     {
+        public int NodesSearched { get; protected set; }
+
         public AlphaBetaResearcher(IEvaluator evaluator, ISorter sorter, IAttackDataGenerator attackDataGenerator, IMovementGenerator quietMovementGenerator,
             IMovementGenerator movementGenerator, IMovementMigrator movementMigrator, ICaptureAnalyst captureAnalyst)
             : base(evaluator, sorter, attackDataGenerator, quietMovementGenerator, movementGenerator, movementMigrator, captureAnalyst)
@@ -18,17 +21,22 @@ namespace ChessEngine.AI.Search
 
         public override void LaunchResearch(Game game, int depth, CancellationToken token)
         {
+            NodesSearched = 0;
+            DateTime start = DateTime.Now;
             Search(game, game.CurrentPlayer, depth, depth, NegativeInfinity, PositiveInfinity, token);
+            Debug.WriteLine($"Search finished ! Depth: {depth}, Num. nodes searched: {NodesSearched}, Time elapsed: {DateTime.Now - start}");
         }
 
         public int Search(Game game, Colour aiSide, int initialDepth, int currentDepth, int alpha, int beta, CancellationToken token)
         {
             if (currentDepth <= 0)
             {
+                NodesSearched++;
                 return CaptureAnalyst.SearchCaptures(game, alpha, beta);
             }
             if (token.IsCancellationRequested)
             {
+                NodesSearched++;
                 return game.CurrentPlayer == aiSide ? LoseScore : WinScore;
             }
             AttackData attackData = AttackDataGenerator.GenerateAttackData(game);
