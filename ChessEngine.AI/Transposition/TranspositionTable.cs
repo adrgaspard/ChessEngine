@@ -1,11 +1,6 @@
 ﻿using ChessEngine.AI.Abstractions;
 using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Match;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessEngine.AI.Transposition
 {

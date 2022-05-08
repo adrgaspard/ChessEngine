@@ -94,7 +94,7 @@ namespace ChessEngine.MVVM.ViewModels
         public GameManagerViewModel(IDispatcherService dispatcherService)
         {
             DispatcherService = dispatcherService;
-            ClockParameters = ClockParametersConsts.Blitz3Plus0;
+            ClockParameters = ClockParametersConsts.Blitz5Plus3;
             GameHashing = new ZobristHashing();
             GameLoader = new FENGameLoader(GameHashing);
             AttackDataGenerator = new AttackDataGenerator();

@@ -5,11 +5,6 @@ using ChessEngine.Core.Interactions;
 using ChessEngine.Core.Interactions.Generation;
 using ChessEngine.Core.Interactions.Generation.Tools;
 using ChessEngine.Core.Match;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessEngine.AI.Sort
 {
