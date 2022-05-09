@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<StartupObject>ChessEngine.UI.WPF.Program</StartupObject>
+		<ApplicationIcon>Resources\icon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,6 +22,10 @@
 	  <None Remove="Resources\Sprites\Pieces\queenWhite.png" />
 	  <None Remove="Resources\Sprites\Pieces\rookBlack.png" />
 	  <None Remove="Resources\Sprites\Pieces\rookWhite.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Resources\icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

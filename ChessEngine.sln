@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.MVVM", "ChessEn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessEngine.AI", "ChessEngine.AI\ChessEngine.AI.csproj", "{0C985113-BD36-4CFD-99B8-CB3E498B8203}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ChessEngine.UI.WPF.Setup", "ChessEngine.UI.WPF.Setup\ChessEngine.UI.WPF.Setup.vdproj", "{66303D18-5609-40F7-9E60-EEFAC452932E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,8 @@ Global
 		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C985113-BD36-4CFD-99B8-CB3E498B8203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66303D18-5609-40F7-9E60-EEFAC452932E}.Debug|Any CPU.ActiveCfg = Debug
+		{66303D18-5609-40F7-9E60-EEFAC452932E}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
