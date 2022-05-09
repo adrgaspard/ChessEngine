@@ -143,7 +143,7 @@ namespace ChessEngine.MVVM.ViewModels
             return (gameVM) => new Dictionary<Colour, PlayerViewModel>(3)
             {
                 { Colour.White, new LocalHumanPlayerViewModel(gameVM, DispatcherService, Colour.White, false) },
-                { Colour.Black, new AIPlayerViewModel(gameVM, DispatcherService, AIFactory.GetAI_Version_6(gameVM.Game)) },
+                { Colour.Black, new AIPlayerViewModel(gameVM, DispatcherService, AIFactory.GetAI_Version_7(gameVM.Game)) },
                 { Colour.White | Colour.Black, new LocalHumanPlayerViewModel(gameVM, DispatcherService, Colour.White, true) },
             };
         }

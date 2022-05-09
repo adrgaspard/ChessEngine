@@ -9,14 +9,17 @@ using System.Diagnostics;
 
 namespace ChessEngine.AI.Search
 {
-    public class AlphaBetaResearcher : SortedResearcherBase
+    public class AlphaBetaResearcher : ResearcherBase
     {
+        public ISorter Sorter { get; protected init; }
+
         public int NodesSearched { get; protected set; }
 
         public AlphaBetaResearcher(IEvaluator evaluator, ISorter sorter, IAttackDataGenerator attackDataGenerator, IMovementGenerator quietMovementGenerator,
             IMovementGenerator movementGenerator, IMovementMigrator movementMigrator, ICaptureAnalyst captureAnalyst)
-            : base(evaluator, sorter, attackDataGenerator, quietMovementGenerator, movementGenerator, movementMigrator, captureAnalyst)
+            : base(evaluator, attackDataGenerator, quietMovementGenerator, movementGenerator, movementMigrator, captureAnalyst)
         {
+            Sorter = sorter;
         }
 
         public override void LaunchResearch(Game game, int depth, CancellationToken token)

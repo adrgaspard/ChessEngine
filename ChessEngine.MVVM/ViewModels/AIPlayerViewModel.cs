@@ -1,6 +1,7 @@
 ﻿using ChessEngine.Core.AI;
 using ChessEngine.Core.Interactions;
 using ChessEngine.MVVM.Models;
+using System.Timers;
 
 namespace ChessEngine.MVVM.ViewModels
 {
@@ -10,10 +11,14 @@ namespace ChessEngine.MVVM.ViewModels
 
         public IChessAI ChessAI { get; protected init; }
 
+        protected System.Timers.Timer Timer { get; set; }
+
         public AIPlayerViewModel(GameViewModel gameVM, IDispatcherService dispatcherService, IChessAI chessAI) : base(gameVM, dispatcherService)
         {
             ChessAI = chessAI;
             CancellationTokenSource = new();
+            Timer = new();
+            Timer.AutoReset = false;
         }
 
         public override void OnTurnToPlayBegan()
@@ -21,19 +26,30 @@ namespace ChessEngine.MVVM.ViewModels
             CancellationTokenSource cancellationTokenSource = CancellationTokenSource;
             Task.Run(() =>
             {
-                Movement movement = ChessAI.SelectMovement(GameVM.Game, cancellationTokenSource.Token);
-                if (!cancellationTokenSource.IsCancellationRequested)
+                ClockParameters parameters = GameVM.Clocks[GameVM.Game.CurrentPlayer].ClockParameters;
+                Timer.Interval = Math.Min(5000, Math.Max(parameters.BaseTime.TotalMilliseconds / 180, parameters.IncrementTime.TotalMilliseconds));
+                Timer.Elapsed += OnTimerElapsed;
+                void OnTimerElapsed(object? sender, ElapsedEventArgs eventArgs)
                 {
-                    InvokeMovementFound(movement);
+                    Timer.Elapsed -= OnTimerElapsed;
+                    cancellationTokenSource.Cancel();
                 }
+                Timer.Start();
+                Movement movement = ChessAI.SelectMovement(GameVM.Game, cancellationTokenSource.Token);
+                Timer.Elapsed -= OnTimerElapsed;
+                InvokeMovementFound(movement);
             });
         }
 
         public override void OnTurnToPlayEnded()
         {
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource.Dispose();
+            if (!CancellationTokenSource.IsCancellationRequested)
+            {
+                CancellationTokenSource.Cancel();
+            }
+            CancellationTokenSource oldCancellationTokenSource = CancellationTokenSource;
             CancellationTokenSource = new();
+            oldCancellationTokenSource.Dispose();
         }
     }
 }

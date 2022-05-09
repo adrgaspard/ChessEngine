@@ -95,5 +95,17 @@ namespace ChessEngine.AI
                 captureAnalyst, transpositionTable);
             return new BranchAndBoundAI(researcher, searchDepth);
         }
+
+        public IChessAI GetAI_Version_7(Game game, int searchDepth = 6, ulong transpositionTableSize = 2048000)
+        {
+            TranspositionTable transpositionTable = new(game, transpositionTableSize);
+            IPieceEvaluator pieceEvaluator = new LarryKaufmanPieceEvaluator();
+            ISorter sorter = new TranspositionSorter(pieceEvaluator, transpositionTable);
+            IEvaluator evaluator = new EzEarlyAndLateGameEvaluator(pieceEvaluator, 10, 14, 4);
+            ICaptureAnalyst captureAnalyst = new BasicCaptureAnalyst(evaluator, sorter, AttackDataGenerator, QuietMovementGenerator, MovementMigrator);
+            IResearcher researcher = new IterativeDeepeningTranspositionAlphaBetaResearcher(evaluator, sorter, AttackDataGenerator, QuietMovementGenerator, MovementGenerator, MovementMigrator,
+                captureAnalyst, transpositionTable);
+            return new BranchAndBoundAI(researcher, searchDepth);
+        }
     }
 }

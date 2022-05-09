@@ -31,6 +31,11 @@ namespace ChessEngine.AI.Transposition
             return Entries[Index].Movement;
         }
 
+        public int GetStoredEvaluation()
+        {
+            return Entries[Index].Value;
+        }
+
         public void Clear()
         {
             for (int i = 0; i < Entries.Length; i++)
@@ -70,7 +75,7 @@ namespace ChessEngine.AI.Transposition
             Entries[Index] = entry;
         }
 
-        protected int GetCorrectMateScoreForStorage(int score, int numPlySearched)
+        protected static int GetCorrectMateScoreForStorage(int score, int numPlySearched)
         {
             if (ResearcherBase.IsMateScore(score))
             {
@@ -80,7 +85,7 @@ namespace ChessEngine.AI.Transposition
             return score;
         }
 
-        protected int GetCorrectRetrievedMateScore(int score, int numPlySearched)
+        protected static int GetCorrectRetrievedMateScore(int score, int numPlySearched)
         {
             if (ResearcherBase.IsMateScore(score))
             {
